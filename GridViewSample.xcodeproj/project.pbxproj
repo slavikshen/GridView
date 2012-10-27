@@ -47,14 +47,14 @@
 		7485A29D16398D11003AEB41 /* VUIGridView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VUIGridView.h; sourceTree = "<group>"; };
 		7485A29E16398D11003AEB41 /* VUIGridView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VUIGridView.m; sourceTree = "<group>"; };
 		7485A2A6163998D4003AEB41 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		749958F916366F1A008F5A2F /* GridView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GridView.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		749958F916366F1A008F5A2F /* GridViewSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GridViewSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		749958FD16366F1A008F5A2F /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		749958FF16366F1A008F5A2F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		7499590116366F1A008F5A2F /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		7499590516366F1A008F5A2F /* GridView-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GridView-Info.plist"; sourceTree = "<group>"; };
+		7499590516366F1A008F5A2F /* GridViewSample-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GridViewSample-Info.plist"; sourceTree = "<group>"; };
 		7499590716366F1A008F5A2F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7499590916366F1A008F5A2F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		7499590B16366F1A008F5A2F /* GridView-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GridView-Prefix.pch"; sourceTree = "<group>"; };
+		7499590B16366F1A008F5A2F /* GridViewSample-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "GridViewSample-Prefix.pch"; sourceTree = "<group>"; };
 		7499590C16366F1A008F5A2F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		7499590D16366F1A008F5A2F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		7499590F16366F1A008F5A2F /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
@@ -108,6 +108,7 @@
 		749958EE16366F1A008F5A2F = {
 			isa = PBXGroup;
 			children = (
+				7485A28E16398D11003AEB41 /* GridView */,
 				7499590316366F1A008F5A2F /* GridViewSample */,
 				749958FC16366F1A008F5A2F /* Frameworks */,
 				749958FA16366F1A008F5A2F /* Products */,
@@ -117,7 +118,7 @@
 		749958FA16366F1A008F5A2F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				749958F916366F1A008F5A2F /* GridView.app */,
+				749958F916366F1A008F5A2F /* GridViewSample.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -136,7 +137,6 @@
 		7499590316366F1A008F5A2F /* GridViewSample */ = {
 			isa = PBXGroup;
 			children = (
-				7485A28E16398D11003AEB41 /* GridView */,
 				7499590C16366F1A008F5A2F /* AppDelegate.h */,
 				7499590D16366F1A008F5A2F /* AppDelegate.m */,
 				7499591516366F1A008F5A2F /* ViewController.h */,
@@ -152,10 +152,10 @@
 		7499590416366F1A008F5A2F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				7499590516366F1A008F5A2F /* GridView-Info.plist */,
+				7499590516366F1A008F5A2F /* GridViewSample-Info.plist */,
 				7499590616366F1A008F5A2F /* InfoPlist.strings */,
 				7499590916366F1A008F5A2F /* main.m */,
-				7499590B16366F1A008F5A2F /* GridView-Prefix.pch */,
+				7499590B16366F1A008F5A2F /* GridViewSample-Prefix.pch */,
 				7499590F16366F1A008F5A2F /* Default.png */,
 				7499591116366F1A008F5A2F /* Default@2x.png */,
 				7499591316366F1A008F5A2F /* Default-568h@2x.png */,
@@ -166,9 +166,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		749958F816366F1A008F5A2F /* GridView */ = {
+		749958F816366F1A008F5A2F /* GridViewSample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7499591D16366F1A008F5A2F /* Build configuration list for PBXNativeTarget "GridView" */;
+			buildConfigurationList = 7499591D16366F1A008F5A2F /* Build configuration list for PBXNativeTarget "GridViewSample" */;
 			buildPhases = (
 				749958F516366F1A008F5A2F /* Sources */,
 				749958F616366F1A008F5A2F /* Frameworks */,
@@ -178,9 +178,9 @@
 			);
 			dependencies = (
 			);
-			name = GridView;
+			name = GridViewSample;
 			productName = GridView;
-			productReference = 749958F916366F1A008F5A2F /* GridView.app */;
+			productReference = 749958F916366F1A008F5A2F /* GridViewSample.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -204,7 +204,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				749958F816366F1A008F5A2F /* GridView */,
+				749958F816366F1A008F5A2F /* GridViewSample */,
 			);
 		};
 /* End PBXProject section */
@@ -317,9 +317,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "GridView/GridView-Prefix.pch";
-				INFOPLIST_FILE = "GridView/GridView-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "GridViewSample/GridViewSample-Prefix.pch";
+				INFOPLIST_FILE = "GridViewSample/GridViewSample-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				PRODUCT_NAME = GridViewSample;
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -328,9 +330,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "GridView/GridView-Prefix.pch";
-				INFOPLIST_FILE = "GridView/GridView-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "GridViewSample/GridViewSample-Prefix.pch";
+				INFOPLIST_FILE = "GridViewSample/GridViewSample-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				PRODUCT_NAME = GridViewSample;
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -347,7 +351,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7499591D16366F1A008F5A2F /* Build configuration list for PBXNativeTarget "GridView" */ = {
+		7499591D16366F1A008F5A2F /* Build configuration list for PBXNativeTarget "GridViewSample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7499591E16366F1A008F5A2F /* Debug */,
