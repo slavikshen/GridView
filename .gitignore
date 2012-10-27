@@ -13,3 +13,20 @@ build/*
 xcuserdata
 profile
 *.moved-aside
+
+# Mac OS X
+*.DS_Store
+
+# Generated files
+*.o
+*.pyc
+
+
+#Python modules
+MANIFEST
+dist/
+build/
+
+# Backup files
+*~.nib
+*.swp
