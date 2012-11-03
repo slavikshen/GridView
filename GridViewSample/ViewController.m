@@ -21,17 +21,22 @@
 	
     NSMutableArray* list = [NSMutableArray arrayWithCapacity:26];
     
-    for( char i = 'A'; i <= 'Z'; i++ ) {
-    	NSString* s = [NSString stringWithFormat:@"%c", i];
-        [list addObject:s];
-    }
+//    for( char i = 'A'; i <= 'Z'; i++ ) {
+//    	NSString* s = [NSString stringWithFormat:@"%c", i];
+//        [list addObject:s];
+//    }
+//
+//    for( char i = 'a'; i <= 'z'; i++ ) {
+//    	NSString* s = [NSString stringWithFormat:@"%c", i];
+//        [list addObject:s];
+//    }
+//    
+//    for( char i = '0'; i <= '9'; i++ ) {
+//    	NSString* s = [NSString stringWithFormat:@"%c", i];
+//        [list addObject:s];
+//    }
 
-    for( char i = 'a'; i <= 'z'; i++ ) {
-    	NSString* s = [NSString stringWithFormat:@"%c", i];
-        [list addObject:s];
-    }
-    
-    for( char i = '0'; i <= '9'; i++ ) {
+    for( char i = '0'; i <= '4'; i++ ) {
     	NSString* s = [NSString stringWithFormat:@"%c", i];
         [list addObject:s];
     }
@@ -58,7 +63,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	CGSize cellSize = CGSizeMake(64, 64);
+	CGSize cellSize = ( IS_PHONE ? CGSizeMake(64, 64) : CGSizeMake(128, 128) );
     CGSize spacing = CGSizeMake(10, 10);
     [_gridView setCellSize:cellSize andSpacing:spacing animate:NO];
 	[self generateTestSample];
@@ -78,6 +83,7 @@
 }
 
 - (IBAction)testReloadData {
+    [self generateTestSample];
 	[_gridView reloadData];
 }
 
@@ -85,9 +91,11 @@
 	
 	static NSUInteger i = 0;
     
-    NSString* text = [NSString stringWithFormat:@"H%d", i++];
-    [_list insertObject:text atIndex:0];
-    [_gridView insertCellAtIndex:0 animated:YES];
+    for( NSUInteger x = 0; x < 2; x++ ) {
+        NSString* text = [NSString stringWithFormat:@"H%d", i++];
+        [_list insertObject:text atIndex:0];
+        [_gridView insertCellAtIndex:0 animated:YES];
+    }
     
 }
 
@@ -96,9 +104,12 @@
 	static NSUInteger i = 0;
 
     NSUInteger index = _list.count/2;
-    NSString* text = [NSString stringWithFormat:@"M%d", i++];
-    [_list insertObject:text atIndex:index];
-    [_gridView insertCellAtIndex:index animated:YES];
+    
+    for( NSUInteger x = 0; x < 2; x++ ) {
+        NSString* text = [NSString stringWithFormat:@"M%d", i++];
+        [_list insertObject:text atIndex:index];
+        [_gridView insertCellAtIndex:index animated:YES];
+    }
     
 }
 
@@ -107,9 +118,12 @@
 	static NSUInteger i = 0;
     
     NSUInteger count = _list.count;
-    NSString* text = [NSString stringWithFormat:@"T%d", i++];
-    [_list insertObject:text atIndex:count];
-    [_gridView insertCellAtIndex:count animated:YES];
+    
+    for( NSUInteger x = 0; x < 2; x++ ) {
+        NSString* text = [NSString stringWithFormat:@"T%d", i++];
+        [_list insertObject:text atIndex:count];
+        [_gridView insertCellAtIndex:count animated:YES];
+    }
     
 }
 

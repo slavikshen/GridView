@@ -10,6 +10,8 @@
 
 @interface VUIGridView (Ani)
 
+- (void)_setNeedAnimChange;
+
 - (void)_animateChangeAfterIndex:(NSUInteger)start;
 - (void)_animateReloadAtIndex:(NSUInteger)index;
 

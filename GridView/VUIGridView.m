@@ -8,12 +8,15 @@
 
 #import "VUIGridView.h"
 #import "VUIGridView+Layout.h"
-#import "VUIGridView+ScrollViewDelegate.h"
 #import "VUIGridView+Private.h"
 #import "VUIGridView+Ani.h"
-
+#import "VUIGridView+ScrollViewDelegate.h"
 #import "VUIGridCellView+Private.h"
 #import "VUIGridViewUpdateCellContentOperation.h"
+
+//#import "VUIGridViewScrollView.h"
+
+#import <QuartzCore/QuartzCore.h>
 
 #ifdef VUI_DEBUG_VUIGRIDVIEW
 #    define VUILog(...) NSLog(__VA_ARGS__)
@@ -46,14 +49,14 @@
 
 - (void)setup {
 
+    _changeStartIndex = NSNotFound;
 
 	_visibleCells = [[NSMutableSet alloc] initWithCapacity:MAX_GRID_VIEW_POOL_SIZE];
 	_recycledCells = [[NSMutableSet alloc] initWithCapacity:MAX_GRID_VIEW_POOL_SIZE];
 
-    CGRect scrollViewFrame = self.bounds;
-    UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:scrollViewFrame];
-    scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
     scrollView.delegate = self;
+    scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     scrollView.alwaysBounceVertical = YES;
     scrollView.bounces = YES;
     scrollView.bouncesZoom = NO;
@@ -246,6 +249,9 @@
         if( NSNotFound != i && i >= index ) {
         	i++;
             [c _setIndex:i];
+            if( c.hidden ) {
+                c.frame = [self _frameForCellAtIndex:i];
+            }
         }
         if( i == newCellIndex ) {
         	found = YES;
@@ -257,13 +263,20 @@
         VUIGridCellView* cell = [self _getMeACellOfIndex:newCellIndex];
         CGRect frame = [self _frameForCellAtIndex:newCellIndex];
         cell.frame = frame;
+        if( newCellIndex == index ) {
+            cell.hidden = YES;
+        }
         
         [_scrollView addSubview:cell];
         [_visibleCells addObject:cell];
     }
     
     if( animated ) {
-    	[self _animateChangeAfterIndex:newCellIndex];
+        if( _changeStartIndex > newCellIndex )  {
+            _changeStartIndex = newCellIndex;
+        }
+        [self _setNeedAnimChange];
+//        [self _animateChangeAfterIndex:newCellIndex];
     } else {
 	    [self _setNeedCheckVisibility];
     }

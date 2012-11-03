@@ -11,7 +11,13 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-#define CLIP_ANI_DURATION (0.3f)
+#define CLIP_ANI_DURATION (0.5f)
+
+@interface VUIGridView (AniPrivate)
+
+- (void)animationAllStoppedInLayer:(CALayer*)layer;
+
+@end
 
 @interface IndexedLayer : CALayer
 
@@ -52,6 +58,26 @@
 
 @implementation VUIGridView (Ani)
 
+- (void)_setNeedAnimChange {
+    if( _needAnimateChange ) {
+        return;
+    }
+    _needAnimateChange = YES;
+    [self performSelectorOnMainThread:@selector(_animateChangeNow) withObject:nil waitUntilDone:NO];
+}
+
+- (void) _animateChangeNow {
+    
+
+    NSUInteger index = _changeStartIndex;
+
+    _needAnimateChange = NO;
+    _changeStartIndex = NSNotFound;
+    
+    [self _animateChangeAfterIndex:index];
+    
+}
+
 - (IndexedLayer*)_newLayerForCell:(VUIGridCellView*)cell offset:(CGPoint)offset {
     
     CGFloat scale = self.window.screen.scale;
@@ -62,9 +88,11 @@
 	UIGraphicsBeginImageContextWithOptions(originalSize,NO,scale);
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     [rootLayer renderInContext:ctx];
-    
-//    CGContextSetFillColorWithColor(ctx, [[UIColor redColor] CGColor]);
-//	CGContextFillRect(ctx, CGRectMake(0, 0, 5, 5));
+
+#ifdef SHOW_RED_DOT_ON_DUMP_LAYER
+    CGContextSetFillColorWithColor(ctx, [[UIColor redColor] CGColor]);
+	CGContextFillRect(ctx, CGRectMake(0, 0, 5, 5));
+#endif
     
 	CGImageRef resultingImage = CGBitmapContextCreateImage(ctx);
 	UIGraphicsEndImageContext();
@@ -92,9 +120,10 @@
     posAni.fromValue = [l valueForKey:@"position"];
     posAni.toValue = [NSValue valueWithCGPoint:pos];
     posAni.removedOnCompletion = YES;
+    posAni.fillMode = kCAFillModeForwards;
     posAni.delegate = delegate;
     l.position = pos;
-    [l addAnimation:posAni forKey:@"position"];
+//    [l addAnimation:posAni forKey:@"position"];
     
     return posAni;
 }
@@ -105,8 +134,9 @@
     alphaAni.fromValue = [l valueForKey:@"opacity"];
     alphaAni.toValue = [NSNumber numberWithFloat:opacity];
     alphaAni.delegate = delegate;
+    alphaAni.fillMode = kCAFillModeForwards;
     l.opacity = opacity;
-    [l addAnimation:alphaAni forKey:@"opacity"];
+//    [l addAnimation:alphaAni forKey:@"opacity"];
     
     return alphaAni;
 }
@@ -123,27 +153,72 @@
 
 	NSMutableArray* layers = [[NSMutableArray alloc] initWithCapacity:_visibleCells.count*2];
 	NSMutableArray* newLineLayers =  [[NSMutableArray alloc] initWithCapacity:_visibleCells.count/_numberOfColumns];
+    
+    CFTimeInterval moveBeginTime = 0;
+    CFTimeInterval insertBeginTime = CLIP_ANI_DURATION;
 
 	// create layers for cell at current position
     for( VUIGridCellView* c in _visibleCells ) {
     	// create layer for each cell
         NSUInteger cellIndex = c.index;
         if( NSNotFound == cellIndex || cellIndex >= start ) {
+//            DLog(@"Dump layer for cell at index %d", cellIndex);
+            c.hidden = NO;
             IndexedLayer* layer = [self _newLayerForCell:c offset:baseOffset];
-            [layers addObject:layer];
+            // insert the layer
+            NSUInteger i = 0;
+            NSUInteger count = layers.count;
+            NSUInteger insertPos = NSNotFound;
+            while( i < count ) {
+                IndexedLayer* l = [layers objectAtIndex:i];
+                if( cellIndex > l.cellIndex ) {
+                    i++;
+                } else {
+                    insertPos = i;
+                    break;
+                }
+            }
+            if( NSNotFound == insertPos ) {
+                insertPos = count;
+            }
+            [layers insertObject:layer atIndex:insertPos];
             [layer release];
+            
+//            DLog(@"dump layer of cell index %d at frame %@", cellIndex, NSStringFromCGRect(layer.frame));
             // hide dumped cell
             c.hidden = YES;
         }
+        if( NSNotFound == cellIndex && moveBeginTime == 0 ) {
+            moveBeginTime = CLIP_ANI_DURATION;
+            insertBeginTime = moveBeginTime + CLIP_ANI_DURATION;
+        }
     }
+
+    
+//    DLog(@"*****before layout******");
+//    for( VUIGridCellView* c in _visibleCells ) {
+//        CGRect destFrame = c.frame;
+//        destFrame.origin.x -= baseOffset.x;
+//        destFrame.origin.y -= baseOffset.y;
+//        DLog(@"cell of index %d is at frame %@", c.index, NSStringFromCGRect(destFrame) );
+//    }
     
     // calculate new positions
     [self _layoutCells];
 
+//    DLog(@"*******after layout*******");
+//    for( VUIGridCellView* c in _visibleCells ) {
+//        CGRect destFrame = c.frame;
+//        destFrame.origin.x -= baseOffset.x;
+//        destFrame.origin.y -= baseOffset.y;
+//        DLog(@"cell of index %d is at frame %@", c.index, NSStringFromCGRect(destFrame) );
+//    }
+    
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
     
     [scrollViewLayer addSublayer:aniLayer];
+
     
   	NSMutableSet* removedCells = nil;
     
@@ -158,12 +233,16 @@
         NSUInteger cellIndex = c.index;
 
         for( IndexedLayer* l in layers ) {
-        	if( l.cellIndex == cellIndex ) {
+            NSUInteger lindex = l.cellIndex;
+            
+        	if( lindex == cellIndex ) {
+//                DLog(@"Check layer of cell index %d", cellIndex);
        	        [aniLayer addSublayer:l];
                	CGRect originFrame = l.frame;
                 CGFloat originY = originFrame.origin.y;
                 CGFloat destY = destFrame.origin.y;
                 if( IS_PIXEL_COORDINATE_CHANGED(originY, destY) ) {
+//                    DLog(@"Move to new line");
                 	// not at the same row now
                     // dump a layer to the new row
                     IndexedLayer* newLayer = [[IndexedLayer alloc] init];
@@ -174,11 +253,11 @@
                     newLayer.anchorPoint = CGPointMake(0,0);
                     
                     CGRect frame = destFrame;
-                    CGFloat cw = frame.size.width;
-                    frame.origin.x += ( destY < originY ? cw : -cw );
+                    CGFloat cw = _numberOfColumns*(self.cellSize.width+self.cellSpacing.width)*(destY < originY?1:-1);
+                    frame.origin.x += cw;
                     newLayer.frame = frame;
                     
-//                    DLog(@"Add cell for new line at frame %@", NSStringFromCGRect(frame));
+//                    DLog(@"Add cell layer for new line at frame %@", NSStringFromCGRect(frame));
 
                 	[newLineLayers addObject:newLayer];
                     
@@ -190,11 +269,16 @@
 					if( cellIndex != NSNotFound ) {
                     	// this is a new cell
                         // hide it at first
+//                        DLog(@"hide new cell");
                 		l.opacity = 0;
                     }
                 } else {
 //                	DLog(@"Just move cell");
                 }
+                break;
+            } else if( lindex > cellIndex ) {
+                // no need to scan
+                break;
             }
         }
         
@@ -211,6 +295,8 @@
     
     [CATransaction commit];
     
+//    DLog(@"start animation");
+    
     CAMediaTimingFunction* outFunc = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
     CAMediaTimingFunction* inFunc = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
 
@@ -225,58 +311,101 @@
 //	            DLog(@"Move & reveal the cell from %@ to %@", NSStringFromCGRect(originFrame), NSStringFromCGRect(frame));
     		    CABasicAnimation* posAni = [self _moveCellLayer:l toPositionWithAni:frame.origin delegate:aniLayer];
         		posAni.timingFunction = inFunc;
+                posAni.timeOffset = moveBeginTime;
+                [l addAnimation:posAni forKey:@"position"];
                 break;
             }
         }
     }
     
 	// create layers for cell at current position
-    for( VUIGridCellView* c in _visibleCells ) {
-    	// create layer for each cell
-        CGRect destFrame = c.frame;
+
         
-        destFrame.origin.x -= baseOffset.x;
-        destFrame.origin.y -= baseOffset.y;
+    for( IndexedLayer* l in layers ) {
+    
+        NSUInteger lindex = l.cellIndex;
+        if( NSNotFound == lindex ) {
+            CABasicAnimation* alphaAni = [self _changeOpacityOfCellLayer:l to:0 delegate:aniLayer];
+            [l addAnimation:alphaAni forKey:@"opacity"];
+            continue;
+        }
         
-        for( IndexedLayer* l in layers ) {
-        	
-            NSUInteger i = l.cellIndex;
-        	
-        	if( i == c.index ) {
-				CGRect originFrame = l.frame;
-                CGFloat originY = originFrame.origin.y;
-                CGFloat destY = destFrame.origin.y;
-                if( IS_PIXEL_COORDINATE_CHANGED(originY, destY) ) {
-                	// move the the right and disppear
-					CGRect frame = originFrame;
-                    CGFloat cw = frame.size.width;
-                    frame.origin.x += ( destY < originY ? -cw : cw );
-//                    DLog(@"Move & hide cell from %@ to %@", NSStringFromCGRect(originFrame) , NSStringFromCGRect(frame));
-                    CABasicAnimation* posAni = [self _moveCellLayer:l toPositionWithAni:frame.origin delegate:aniLayer];
-                    CABasicAnimation* alphaAni = [self _changeOpacityOfCellLayer:l to:0 delegate:aniLayer];
-                    
-                    posAni.timingFunction = outFunc;
-	                alphaAni.timingFunction = outFunc;
-                    
-                } else if( !IS_DIFFERENT_FRAME(originFrame, destFrame) ) {
-	                
-//                    DLog(@"Reveal the cell");
-                    if( i != NSNotFound ) {
-	                    CABasicAnimation* alphaAni = [self _changeOpacityOfCellLayer:l to:1 delegate:aniLayer];
-	                	alphaAni.beginTime = CLIP_ANI_DURATION;
-                    } else {
-	                    [self _changeOpacityOfCellLayer:l to:0 delegate:aniLayer];
-                    }
-                    
-                } else {
-                
-//                	DLog(@"Move cell from %@ to %@ ", NSStringFromCGRect(originFrame) , NSStringFromCGRect(destFrame));
-                    [self _moveCellLayer:l toPositionWithAni:destFrame.origin delegate:aniLayer];
-                }
+        VUIGridCellView* cell = nil;
+        for( VUIGridCellView* c in _visibleCells ) {
+            if( c.index == lindex ) {
+                cell = c;
                 break;
             }
         }
+        
+        if( nil == cell ) {
+            continue;
+        }
+        
+        CGRect destFrame = cell.frame;
+        
+        destFrame.origin.x -= baseOffset.x;
+        destFrame.origin.y -= baseOffset.y;
+
+//        DLog(@"Check ani for layer of cell index %d", lindex);
+        
+        CGRect originFrame = l.frame;
+        CGFloat originY = originFrame.origin.y;
+        CGFloat destY = destFrame.origin.y;
+        if( IS_PIXEL_COORDINATE_CHANGED(originY, destY) ) {
+            // move the the right and disppear
+//            DLog(@"check the layer of new line");
+            CGPoint pos = originFrame.origin;
+            CGFloat cw = (self.cellSize.width+self.cellSpacing.width)*(destY < originY?-1:1);
+            if( 0 != lindex ) {
+                NSUInteger prevIndex = lindex - 1;
+                // find the previouse layer
+                for( IndexedLayer* prev in layers ) {
+                    NSUInteger pIndex = prev.cellIndex;
+                    if( pIndex == prevIndex ) {
+//                        DLog(@"Change by prev position %@", NSStringFromCGPoint(prev.position));
+                        if( IS_PIXEL_COORDINATE_CHANGED(prev.position.y, pos.y) ) {
+                            pos.x = _numberOfColumns*cw;
+                        } else {
+                            pos.x = prev.position.x + cw;
+                        }
+                        break;
+                    } else if( pIndex > prevIndex ) {
+//                        DLog(@"not found");
+                        break;
+                    }
+                }
+            } else {
+//                DLog(@"just move");
+                pos.x += cw;
+            }
+            
+//            DLog(@"Move & hide cell from %@ to %@", NSStringFromCGPoint(originFrame.origin) , NSStringFromCGPoint(pos));
+            CABasicAnimation* posAni = [self _moveCellLayer:l toPositionWithAni:pos delegate:aniLayer];
+            CABasicAnimation* alphaAni = [self _changeOpacityOfCellLayer:l to:0 delegate:aniLayer];
+            CAAnimationGroup *anim = [CAAnimationGroup animation];
+            [anim setAnimations:[NSArray arrayWithObjects:posAni, alphaAni, nil]];
+            [anim setDuration:CLIP_ANI_DURATION];
+            [anim setFillMode:kCAFillModeForwards];
+            anim.timeOffset = moveBeginTime;
+            [l addAnimation:anim forKey:nil];
+            
+            posAni.timingFunction = outFunc;
+            alphaAni.timingFunction = outFunc;
+            
+        } else if( !IS_DIFFERENT_FRAME(originFrame, destFrame) ) {
+//                        DLog(@"Reveil the new cell");
+            CABasicAnimation* alphaAni = [self _changeOpacityOfCellLayer:l to:1 delegate:aniLayer];
+            alphaAni.timeOffset = insertBeginTime;
+            [l addAnimation:alphaAni forKey:@"opacity"];
+        } else {
+//                	DLog(@"Move cell from %@ to %@ ", NSStringFromCGRect(originFrame) , NSStringFromCGRect(destFrame));
+            CABasicAnimation* posAni = [self _moveCellLayer:l toPositionWithAni:destFrame.origin delegate:aniLayer];
+            posAni.timeOffset = moveBeginTime;
+            [l addAnimation:posAni forKey:@"position"];
+        }
     }
+    
 
     [newLineLayers release];
     [layers release];
@@ -343,7 +472,9 @@
         	opacity = 1;
             delay = CLIP_ANI_DURATION;
         }
-        [self _changeOpacityOfCellLayer:l to:opacity delegate:aniLayer].beginTime = delay;
+        CABasicAnimation* alphaAni = [self _changeOpacityOfCellLayer:l to:opacity delegate:aniLayer];
+        alphaAni.timeOffset = delay;
+        [l addAnimation:alphaAni forKey:@"opacity"];
     }
     
     if( removedCells ) {

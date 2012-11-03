@@ -58,6 +58,9 @@
     
     CALayer* _aniLayer;
     
+    BOOL _needAnimateChange;
+    NSUInteger _changeStartIndex;
+    
 }
 
 @property(nonatomic,readonly,assign) CGSize cellSize;

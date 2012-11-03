@@ -17,7 +17,7 @@
 
 - (void)_setNeedCheckVisibility;
 
-- (void)_checkVisibilityNow;
+//- (void)_checkVisibilityNow;
 
 - (void)_removeAllVisibleCells;
 
@@ -26,5 +26,7 @@
 - (NSRange)_calculateVisibleRange;
 - (void)_layoutCells;
 - (CGRect)_frameForCellAtIndex:(NSUInteger)index;
+
+- (void)_checkVisibilityWhenScrollViewLayout;
 
 @end

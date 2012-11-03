@@ -79,6 +79,7 @@
     
     _needCheckVisibility = YES;
     [self performSelectorOnMainThread:@selector(_checkVisibilityNow) withObject:nil waitUntilDone:NO];
+//    [self.scrollView setNeedsLayout];
 }
 
 - (void)_layoutCells {
@@ -397,7 +398,6 @@
    	[self _doCheckVisibility];
 }
 
-
 - (void)layoutSubviews {
 
 	[super layoutSubviews];
@@ -406,6 +406,12 @@
 		[self _resetContentSize];
 	    [self _layoutCells];
     }
+}
+
+- (void)_checkVisibilityWhenScrollViewLayout {
+    _needAnimateChange = NO;
+    _changeStartIndex = NSNotFound;
+    [self _doCheckVisibility];
 }
 
 @end
