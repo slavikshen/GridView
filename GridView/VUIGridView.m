@@ -250,14 +250,15 @@
         [_visibleCells addObject:cell];
     }
     
-    if( animated ) {
-        if( _changeStartIndex > newCellIndex )  {
-            _changeStartIndex = newCellIndex;
+    if( !_needCheckVisibility ) {
+        if( animated ) {
+            if( _changeStartIndex > newCellIndex )  {
+                _changeStartIndex = newCellIndex;
+            }
+            [self _setNeedAnimChange];
+        } else {
+            [self _setNeedCheckVisibility];
         }
-        [self _setNeedAnimChange];
-//        [self _animateChangeAfterIndex:newCellIndex];
-    } else {
-	    [self _setNeedCheckVisibility];
     }
 }
 
@@ -321,10 +322,15 @@
         }
     }
 
-    if( animated ) {
-    	[self _animateChangeAfterIndex:newCellIndex];
-    } else {
-	    [self _setNeedCheckVisibility];
+    if( !_needCheckVisibility ) {
+        if( animated ) {
+            if( _changeStartIndex > newCellIndex )  {
+                _changeStartIndex = newCellIndex;
+            }
+            [self _setNeedAnimChange];
+        } else {
+            [self _setNeedCheckVisibility];
+        }
     }
 }
 
@@ -342,7 +348,7 @@
             break;
         }
     }
-    if( found ) {
+    if( found && !_needCheckVisibility ) {
     	if( animated ) {
         	
             // create a new cell and insert it

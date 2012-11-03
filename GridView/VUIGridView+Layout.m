@@ -394,7 +394,8 @@
     	return;
     }
 	_needCheckVisibility = NO;
-
+    _needAnimateChange = NO;
+    _changeStartIndex = NSNotFound;
    	[self _doCheckVisibility];
 }
 
@@ -406,12 +407,6 @@
 		[self _resetContentSize];
 	    [self _layoutCells];
     }
-}
-
-- (void)_checkVisibilityWhenScrollViewLayout {
-    _needAnimateChange = NO;
-    _changeStartIndex = NSNotFound;
-    [self _doCheckVisibility];
 }
 
 @end

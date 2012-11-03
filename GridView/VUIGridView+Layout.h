@@ -27,6 +27,5 @@
 - (void)_layoutCells;
 - (CGRect)_frameForCellAtIndex:(NSUInteger)index;
 
-- (void)_checkVisibilityWhenScrollViewLayout;
 
 @end

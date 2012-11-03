@@ -21,25 +21,25 @@
 	
     NSMutableArray* list = [NSMutableArray arrayWithCapacity:26];
     
-//    for( char i = 'A'; i <= 'Z'; i++ ) {
-//    	NSString* s = [NSString stringWithFormat:@"%c", i];
-//        [list addObject:s];
-//    }
-//
-//    for( char i = 'a'; i <= 'z'; i++ ) {
-//    	NSString* s = [NSString stringWithFormat:@"%c", i];
-//        [list addObject:s];
-//    }
-//    
-//    for( char i = '0'; i <= '9'; i++ ) {
-//    	NSString* s = [NSString stringWithFormat:@"%c", i];
-//        [list addObject:s];
-//    }
-
-    for( char i = '0'; i <= '4'; i++ ) {
+    for( char i = 'A'; i <= 'Z'; i++ ) {
     	NSString* s = [NSString stringWithFormat:@"%c", i];
         [list addObject:s];
     }
+
+    for( char i = 'a'; i <= 'z'; i++ ) {
+    	NSString* s = [NSString stringWithFormat:@"%c", i];
+        [list addObject:s];
+    }
+    
+    for( char i = '0'; i <= '9'; i++ ) {
+    	NSString* s = [NSString stringWithFormat:@"%c", i];
+        [list addObject:s];
+    }
+
+//    for( char i = '0'; i <= '4'; i++ ) {
+//    	NSString* s = [NSString stringWithFormat:@"%c", i];
+//        [list addObject:s];
+//    }
     
     self.list = list;
 }
@@ -129,7 +129,9 @@
 
 - (IBAction)testRmAtHead {
 	[_list removeObjectAtIndex:0];
-    [_gridView removeCellAtIndex:0 animated:YES];
+    for( NSUInteger x = 0; x < 2; x++ ) {
+        [_gridView removeCellAtIndex:0 animated:YES];
+    }
 }
 
 - (IBAction)testRmAtMid {
