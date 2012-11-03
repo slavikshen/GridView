@@ -47,7 +47,6 @@
 	NSMutableSet* _recycledCells;
     
     BOOL _needCheckVisibility;
-    BOOL _updating;
     
     NSUInteger _numberOfCells;
     NSUInteger _numberOfColumns;
@@ -55,8 +54,6 @@
     
     BOOL _delegateWillResponseClick;
 	BOOL _dataSourceWillUpgradeContent;
-    
-    CALayer* _aniLayer;
     
     BOOL _needAnimateChange;
     NSUInteger _changeStartIndex;
@@ -80,8 +77,6 @@
 - (void)setup;
 
 - (void)reloadData;
-- (void)beginUpdates;
-- (void)endUpdates;
 
 - (void)setCellSize:(CGSize)cellSize andSpacing:(CGSize)cellSpacing animate:(BOOL)animated;
 

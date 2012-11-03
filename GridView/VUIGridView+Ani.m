@@ -32,6 +32,7 @@
 @interface CellAniLayer : CALayer
 
 @property(nonatomic,assign) NSUInteger aniCount;
+@property(nonatomic,assign) VUIGridView* gridView;
 
 @end
 
@@ -48,11 +49,14 @@
 	_aniCount--;
     
     if( 0 == _aniCount ) {
-    	[self.delegate animationAllStoppedInLayer:self];
+    	[_gridView animationAllStoppedInLayer:self];
     }
 
 }
 
+- (CALayer *)hitTest:(CGPoint)thePoint {
+    return nil;
+}
 
 @end
 
@@ -74,11 +78,15 @@
     _needAnimateChange = NO;
     _changeStartIndex = NSNotFound;
     
-    [self _animateChangeAfterIndex:index];
+    @autoreleasepool {
+        [self _animateChangeAfterIndex:index];
+    }
+    
+
     
 }
 
-- (IndexedLayer*)_newLayerForCell:(VUIGridCellView*)cell offset:(CGPoint)offset {
+- (IndexedLayer*)_layerForCell:(VUIGridCellView*)cell offset:(CGPoint)offset {
     
     CGFloat scale = self.window.screen.scale;
     CALayer* rootLayer = cell.layer;
@@ -97,7 +105,7 @@
 	CGImageRef resultingImage = CGBitmapContextCreateImage(ctx);
 	UIGraphicsEndImageContext();
     
-	IndexedLayer* layer = [[IndexedLayer alloc] init];
+	IndexedLayer* layer = [IndexedLayer layer];
     layer.contentsScale = scale;
     layer.cellIndex = cell.index;
     layer.anchorPoint = CGPointZero;
@@ -119,11 +127,10 @@
     posAni.duration = CLIP_ANI_DURATION;
     posAni.fromValue = [l valueForKey:@"position"];
     posAni.toValue = [NSValue valueWithCGPoint:pos];
-    posAni.removedOnCompletion = YES;
+    posAni.removedOnCompletion = NO;
     posAni.fillMode = kCAFillModeForwards;
     posAni.delegate = delegate;
     l.position = pos;
-//    [l addAnimation:posAni forKey:@"position"];
     
     return posAni;
 }
@@ -134,9 +141,9 @@
     alphaAni.fromValue = [l valueForKey:@"opacity"];
     alphaAni.toValue = [NSNumber numberWithFloat:opacity];
     alphaAni.delegate = delegate;
+    alphaAni.removedOnCompletion = NO;
     alphaAni.fillMode = kCAFillModeForwards;
     l.opacity = opacity;
-//    [l addAnimation:alphaAni forKey:@"opacity"];
     
     return alphaAni;
 }
@@ -145,11 +152,12 @@
 
 	CALayer* scrollViewLayer = self.scrollView.layer;
     CellAniLayer* aniLayer = [CellAniLayer layer];
+
     CGRect bounds = scrollViewLayer.bounds;
     CGPoint baseOffset = bounds.origin;
 
     aniLayer.frame = bounds;
-    aniLayer.delegate = self;
+    aniLayer.gridView = self;
 
 	NSMutableArray* layers = [[NSMutableArray alloc] initWithCapacity:_visibleCells.count*2];
 	NSMutableArray* newLineLayers =  [[NSMutableArray alloc] initWithCapacity:_visibleCells.count/_numberOfColumns];
@@ -164,7 +172,7 @@
         if( NSNotFound == cellIndex || cellIndex >= start ) {
 //            DLog(@"Dump layer for cell at index %d", cellIndex);
             c.hidden = NO;
-            IndexedLayer* layer = [self _newLayerForCell:c offset:baseOffset];
+            IndexedLayer* layer = [self _layerForCell:c offset:baseOffset];
             // insert the layer
             NSUInteger i = 0;
             NSUInteger count = layers.count;
@@ -182,8 +190,6 @@
                 insertPos = count;
             }
             [layers insertObject:layer atIndex:insertPos];
-            [layer release];
-            
 //            DLog(@"dump layer of cell index %d at frame %@", cellIndex, NSStringFromCGRect(layer.frame));
             // hide dumped cell
             c.hidden = YES;
@@ -428,7 +434,7 @@
     CGPoint baseOffset = bounds.origin;
 
     aniLayer.frame = bounds;
-    aniLayer.delegate = self;
+    aniLayer.gridView = self;
     
     NSMutableSet* removedCells = nil;
     
@@ -440,9 +446,8 @@
     	// create layer for each cell
         NSUInteger cellIndex = c.index;
         if( NSNotFound == cellIndex || cellIndex == index ) {
-            IndexedLayer* layer = [self _newLayerForCell:c offset:baseOffset];
+            IndexedLayer* layer = [self _layerForCell:c offset:baseOffset];
             [aniLayer addSublayer:layer];
-            [layer release];
             // hide dumped cell
             c.hidden = YES;
             if( cellIndex == NSNotFound ) {
@@ -504,7 +509,6 @@
             }
         }
         [layer removeFromSuperlayer];
-
     });
 
 

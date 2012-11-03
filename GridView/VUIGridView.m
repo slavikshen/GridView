@@ -178,27 +178,6 @@
     }
 }
 
-- (void)beginUpdates {
-	VUILog(@"VUIGridView begins updates");
-	_updating = YES;
-}
-
-- (void)endUpdates {
-	VUILog(@"VUIGridView ends updates");    
-	_updating = NO;
-    if( _dataSource ) {
-		[self _setNeedCheckVisibility];
-    } else {
-    	 // clear all unnecessary
-		[self _removeAllVisibleCells];
-        [_recycledCells removeAllObjects];
-        _numberOfColumns = 1;
-        _numberOfRows = 0;
-        _numberOfCells = 0;
-        _scrollView.contentSize = _scrollView.bounds.size;
-    }
-}
-
 - (void)reloadData {
 	[UIApplication cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadData) object:nil];
     
