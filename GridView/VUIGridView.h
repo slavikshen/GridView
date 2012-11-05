@@ -9,6 +9,13 @@
 #import <UIKit/UIKit.h>
 #import "VUIGridCellView.h"
 
+#define SRELEASE(x) { [x release]; x = nil; }
+#define IS_PIXEL_COORDINATE_CHANGED(a,b) (ABS(a-b)>1)
+#define IS_SIZE_CHANGED(p,n) (ABS(p.width-n.width)>1||ABS(p.height-n.height)>1)
+#define IS_POSITION_CHANGED(p,n) (ABS(p.x-n.x)>1||ABS(p.y-n.y)>1)
+
+#define IS_DIFFERENT_FRAME(p,n) (IS_SIZE_CHANGED(p.size,n.size)||IS_POSITION_CHANGED(p.origin,n.origin))
+
 #define VUIGRIDVIEW_CELL_ANI_DURATION (0.5f)
 
 #define VUIGRIDVIEW_DEFAULT_CELL_SIZE CGSizeMake(320, 240)
