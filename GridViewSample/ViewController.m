@@ -60,12 +60,21 @@
     return cell;
 }
 
+- (CGSize)cellSizeOfGridView:(VUIGridView *)gridView {
+    CGSize cellSize = ( IS_PHONE ? CGSizeMake(64, 64) : CGSizeMake(128, 128) );
+    return cellSize;
+}
+
+- (CGSize)cellSpacingOfGridView:(VUIGridView *)gridView {
+    return CGSizeMake(10, 10);
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	CGSize cellSize = ( IS_PHONE ? CGSizeMake(64, 64) : CGSizeMake(128, 128) );
-    CGSize spacing = CGSizeMake(10, 10);
-    [_gridView setCellSize:cellSize andSpacing:spacing animate:NO];
+//	CGSize cellSize = ( IS_PHONE ? CGSizeMake(64, 64) : CGSizeMake(128, 128) );
+//    CGSize spacing = CGSizeMake(10, 10);
+//    [_gridView setCellSize:cellSize andSpacing:spacing animate:NO];
 	[self generateTestSample];
 }
 
@@ -169,5 +178,12 @@
     [_gridView reloadCellAtIndex:index animated:YES];
 }
 
+- (IBAction)switchMode {
+    if( _gridView.mode ) {
+        _gridView.mode = VUIGridViewMode_Vertical;
+    } else {
+        _gridView.mode = VUIGridViewMode_Horizental;
+    }
+}
 
 @end

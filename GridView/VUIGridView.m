@@ -28,9 +28,6 @@
 
 @interface VUIGridView()
 
-@property(nonatomic,readwrite,assign) CGSize cellSize;
-@property(nonatomic,readwrite,assign) CGSize cellSpacing;
-
 @property(nonatomic,readwrite,assign) UILabel* emtpyHintLabel;
 
 @property(nonatomic,readwrite,assign) UIScrollView* scrollView;
@@ -43,13 +40,19 @@
 
 @implementation VUIGridView
 
-@synthesize numberOfCells = _numberOfCells;
-@synthesize numberOfColumns = _numberOfColumns;
-@synthesize numberOfRows = _numberOfRows;
+@synthesize numberOfCell = _numberOfCell;
+@synthesize numberOfColumn = _numberOfColumn;
+@synthesize numberOfRow = _numberOfRow;
 
 - (void)setup {
 
     _changeStartIndex = NSNotFound;
+    
+    _numberOfColumn = 1;
+    _numberOfRow = 1;
+    _numberOfColumnInPage = 1;
+    _numberOfRowInPage = 1;
+    _numberOfCellInPage = 1;
 
 	_visibleCells = [[NSMutableSet alloc] initWithCapacity:MAX_GRID_VIEW_POOL_SIZE];
 	_recycledCells = [[NSMutableSet alloc] initWithCapacity:MAX_GRID_VIEW_POOL_SIZE];
@@ -74,8 +77,8 @@
     [scrollView release];
     
     // default cell size
- 	self.cellSize = VUIGRIDVIEW_DEFAULT_CELL_SIZE;
-   	self.cellSpacing = VUIGRIDVIEW_DEFAULT_CELL_SPACING;
+ 	_cellSize = VUIGRIDVIEW_DEFAULT_CELL_SIZE;
+   	_cellSpacing = VUIGRIDVIEW_DEFAULT_CELL_SPACING;
 
 }
 
@@ -127,6 +130,17 @@
     return cell;
 }
 
+- (void)setMode:(VUIGridViewMode)mode {
+    if( mode != _mode ) {
+        _mode = mode;
+        _scrollView.pagingEnabled = (_mode?YES:NO);
+        if( _numberOfCell ) {
+            [self _resetContentSize];
+            [self _setNeedCheckVisibility];
+        }
+    }
+}
+
 - (void)setDataSource:(id<VUIGridViewDataSource>)dataSource {
 	if( _dataSource != dataSource ) {
     	_dataSource = dataSource;
@@ -159,30 +173,11 @@
     }
 }
 
--(void)setCellSize:(CGSize)cellSize andSpacing:(CGSize)cellSpacing animate:(BOOL)animated {
-
-	BOOL changed = NO;
-    
-	if( IS_SIZE_CHANGED(_cellSize, cellSize) ) {
-		_cellSize = cellSize;
-		changed = YES;
-    }
-    if( IS_SIZE_CHANGED(_cellSpacing, cellSpacing) ) {
-		_cellSpacing = cellSpacing;
-        changed = YES;
-    }
-
-    if( changed && _dataSource && _numberOfCells ) {
-	    [self _resetContentSize];
-        [self _setNeedCheckVisibility];
-    }
-}
-
 - (void)reloadData {
 	[UIApplication cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadData) object:nil];
     
     if( _dataSource ) {
-        _numberOfCells = [_dataSource numberOfCellOfGridView:self];
+        _numberOfCell = [_dataSource numberOfCellOfGridView:self];
 	    [self _resetContentSize];
 		// clear all cells and check visibility again
         [self _removeAllVisibleCells];
@@ -191,9 +186,9 @@
         // clear all unnecessary
 		[self _removeAllVisibleCells];
         [_recycledCells removeAllObjects];
-        _numberOfColumns = 1;
-        _numberOfRows = 0;
-        _numberOfCells = 0;
+        _numberOfColumn = 1;
+        _numberOfRow = 0;
+        _numberOfCell = 0;
         _scrollView.contentSize = _scrollView.bounds.size;
     }
 }
@@ -372,7 +367,7 @@
 - (void)insertCellAtIndex:(NSUInteger)index animated:(BOOL)animated {
 	VUILog(@"VUIGridView insert cell at index %d", index);
     
-    _numberOfCells = [_dataSource numberOfCellOfGridView:self];
+    _numberOfCell = [_dataSource numberOfCellOfGridView:self];
     [self _resetContentSize];
     
 	NSRange visibleRange = [self _calculateVisibleRange];
@@ -444,7 +439,7 @@
     }
     
 	// refresh content size now
-    _numberOfCells = [_dataSource numberOfCellOfGridView:self];
+    _numberOfCell = [_dataSource numberOfCellOfGridView:self];
     [self _resetContentSize];
     
     if( _changeStartIndex > newCellIndex )  {

@@ -20,7 +20,7 @@
 
 - (void)_popRecycledCellsIfNecessary {
 
-	NSUInteger max = _numberOfColumns > 1 ? _numberOfColumns : 2;
+    NSUInteger max = ( self.mode ? _numberOfRowInPage : _numberOfColumnInPage );
     while( _recycledCells.count > max ) {
 		// pop any object
         [_recycledCells removeObject:[_recycledCells anyObject]];
@@ -82,39 +82,33 @@
 //    [self.scrollView setNeedsLayout];
 }
 
-- (void)_layoutCells {
+- (void)_layoutCellsInVerticalModeFromIndex:(NSUInteger)index {
 
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
     
     CGFloat W = bounds.size.width;
     
-    CGSize cellSize = self.cellSize;
-    CGSize spacing = self.cellSpacing;
+    CGFloat cW = _cellSize.width;
+    CGFloat cH = _cellSize.height;
+    CGFloat cPW = _cellSpacing.width;
+    CGFloat cPH = _cellSpacing.height;
     
-    CGFloat cW = cellSize.width;
-    CGFloat cH = cellSize.height;
-    CGFloat cPW = spacing.width;
-    CGFloat cPH = spacing.height;
+    NSInteger col = _numberOfColumnInPage;
     
-    NSInteger col = _numberOfColumns;
-    
-    CGFloat cWPW = cW+cPW;
-    CGFloat cHPH = cH+cPH;
-    CGFloat leftIndent = (W-((col-1)*cWPW+cW))/2;
-    CGFloat topIndent = cPH;
+    NSInteger cWPW = cW+cPW;
+    NSInteger cHPH = cH+cPH;
+    NSInteger leftIndent = floorf((W-((col-1)*cWPW+cW))/2);
+    NSInteger topIndent = cPH;
     
 	for( VUIGridCellView* c in _visibleCells ) {
-        
     	NSUInteger i = c.index;
-        
-        if( i != NSNotFound ) {
-        	// don't layout the deleted cells
+        if( NSNotFound != i && i >= index ) {
             NSUInteger cellCol = i % col;
             NSUInteger cellRow = i / col;
             
-            CGFloat x = leftIndent+cellCol*cWPW;
-            CGFloat y = topIndent+cellRow*cHPH;
+            NSInteger x = leftIndent+cellCol*cWPW;
+            NSInteger y = topIndent+cellRow*cHPH;
             
             CGRect newFrame = CGRectMake(x, y, cW, cH);
             
@@ -125,78 +119,86 @@
             }
         }
     }
+}
+
+- (void)_layoutCellsInHorizentalModeFromIndex:(NSUInteger)index {
+
+    UIScrollView* scrollView = self.scrollView;
+	CGRect bounds = scrollView.bounds;
     
+    CGFloat W = bounds.size.width;
+    
+    CGFloat cW = _cellSize.width;
+    CGFloat cH = _cellSize.height;
+    CGFloat cPW = _cellSpacing.width;
+    CGFloat cPH = _cellSpacing.height;
+    
+    NSUInteger col = _numberOfColumnInPage;
+    NSUInteger row = _numberOfRowInPage;
+    NSUInteger numberOfCellInPage = _numberOfCellInPage;
+    
+    NSInteger cWPW = cW+cPW;
+    NSInteger cHPH = cH+cPH;
+        
+    NSInteger asideSpacing = (W-((col-1)*cWPW+cW));
+    NSInteger topIndent = cPH;
+    
+	for( VUIGridCellView* c in _visibleCells ) {
+    	NSUInteger i = c.index;
+        if( i != NSNotFound && i >= index ) {
+        	// don't layout the deleted cells
+            NSUInteger cellCol = i / row;
+            NSUInteger cellRow = i % row;
+            
+            NSUInteger pageIndex = i/numberOfCellInPage;
+            NSInteger leftIndent = asideSpacing*(pageIndex+1)-asideSpacing/2;
+            
+            NSInteger x = leftIndent+cellCol*cWPW;
+            NSInteger y = topIndent+cellRow*cHPH;
+            
+            CGRect newFrame = CGRectMake(x, y, cW, cH);
+            
+            CGRect oldFrame = c.frame;
+            
+            if( IS_DIFFERENT_FRAME(newFrame, oldFrame)) {
+                c.frame = newFrame;
+            }
+        }
+    }
 }
 
 - (void)_layoutCellsFromIndex:(NSUInteger)index {
-
-    UIScrollView* scrollView = self.scrollView;
-	CGRect bounds = scrollView.bounds;
-    
-    CGFloat W = bounds.size.width;
-    
-    CGSize cellSize = self.cellSize;
-    CGSize spacing = self.cellSpacing;
-    
-    CGFloat cW = cellSize.width;
-    CGFloat cH = cellSize.height;
-    CGFloat cPW = spacing.width;
-    CGFloat cPH = spacing.height;
-    
-    NSInteger col = _numberOfColumns;
-    
-    CGFloat cWPW = cW+cPW;
-    CGFloat cHPH = cH+cPH;
-    CGFloat leftIndent = (W-((col-1)*cWPW+cW))/2;
-    CGFloat topIndent = cPH;
-    
-	for( VUIGridCellView* c in _visibleCells ) {
-    	NSUInteger i = c.index;
-        if( i >= index ) {
-            NSUInteger cellCol = i % col;
-            NSUInteger cellRow = i / col;
-            
-            CGFloat x = leftIndent+cellCol*cWPW;
-            CGFloat y = topIndent+cellRow*cHPH;
-            
-            CGRect newFrame = CGRectMake(x, y, cW, cH);
-            
-            CGRect oldFrame = c.frame;
-            
-            if( IS_DIFFERENT_FRAME(newFrame, oldFrame)) {
-                c.frame = newFrame;
-            }
-        }
+    if( self.mode ) {
+        [self _layoutCellsInHorizentalModeFromIndex:index];
+    } else {
+        [self _layoutCellsInVerticalModeFromIndex:index];
     }
 }
 
-- (CGRect)_frameForCellAtIndex:(NSUInteger)index {
+- (CGRect)_frameForCellInVerticalModeAtIndex:(NSUInteger)index {
 
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
     
     CGFloat W = bounds.size.width;
     
-    CGSize cellSize = self.cellSize;
-    CGSize spacing = self.cellSpacing;
+    CGFloat cW = _cellSize.width;
+    CGFloat cH = _cellSize.height;
+    CGFloat cPW = _cellSpacing.width;
+    CGFloat cPH = _cellSpacing.height;
     
-    CGFloat cW = cellSize.width;
-    CGFloat cH = cellSize.height;
-    CGFloat cPW = spacing.width;
-    CGFloat cPH = spacing.height;
+    NSInteger col = _numberOfColumnInPage;
     
-    NSInteger col = _numberOfColumns;
-    
-    CGFloat cWPW = cW+cPW;
-    CGFloat cHPH = cH+cPH;
-    CGFloat leftIndent = (W-((col-1)*cWPW+cW))/2;
-    CGFloat topIndent = cPH;
+    NSInteger cWPW = cW+cPW;
+    NSInteger cHPH = cH+cPH;
+    NSInteger leftIndent = (W-((col-1)*cWPW+cW))/2;
+    NSInteger topIndent = cPH;
     
     NSUInteger cellCol = index % col;
     NSUInteger cellRow = index / col;
     
-    CGFloat x = leftIndent+cellCol*cWPW;
-    CGFloat y = topIndent+cellRow*cHPH;
+    NSInteger x = leftIndent+cellCol*cWPW;
+    NSInteger y = topIndent+cellRow*cHPH;
     
     CGRect frame = CGRectMake(x, y, cW, cH);
 
@@ -204,28 +206,77 @@
     
 }
 
-- (void)_resetContentSize {
+- (CGRect)_frameForCellInHorizentalModeAtIndex:(NSUInteger)index {
+
+    UIScrollView* scrollView = self.scrollView;
+	CGRect bounds = scrollView.bounds;
+    
+    CGFloat W = bounds.size.width;
+    
+    CGFloat cW = _cellSize.width;
+    CGFloat cH = _cellSize.height;
+    CGFloat cPW = _cellSpacing.width;
+    CGFloat cPH = _cellSpacing.height;
+    
+    NSUInteger col = _numberOfColumnInPage;
+    NSUInteger row = _numberOfRowInPage;
+    NSUInteger numberOfCellInPage = _numberOfCellInPage;
+    
+    NSInteger cWPW = cW+cPW;
+    NSInteger cHPH = cH+cPH;
+    
+    NSUInteger pageIndex = index/numberOfCellInPage;
+    
+    NSInteger asideSpacing = (W-((col-1)*cWPW+cW));
+    
+    NSInteger leftIndent = asideSpacing*(pageIndex+1)-asideSpacing/2;
+    NSInteger topIndent = cPH;
+
+    // don't layout the deleted cells
+    NSUInteger cellCol = index / row;
+    NSUInteger cellRow = index % row;
+    
+    NSInteger x = leftIndent+cellCol*cWPW;
+    NSInteger y = topIndent+cellRow*cHPH;
+    
+    CGRect frame = CGRectMake(x, y, cW, cH);
+    
+	return frame;
+    
+}
+
+- (CGRect)_frameForCellAtIndex:(NSUInteger)index {
+    if( self.mode ) {
+        return [self _frameForCellInHorizentalModeAtIndex:index];
+    } else {
+        return [self _frameForCellInVerticalModeAtIndex:index];
+    }
+}
+
+- (void)_resetContentSizeInVerticalMode {
 
 	UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
     
     CGFloat W = bounds.size.width;
+    CGFloat H = bounds.size.height;
     
-    CGSize cellSize = self.cellSize;
-    CGSize spacing = self.cellSpacing;
+    CGFloat cW = _cellSize.width;
+    CGFloat cH = _cellSize.height;
+    CGFloat cPW = _cellSpacing.width;
+    CGFloat cPH = _cellSpacing.height;
     
-    CGFloat cW = cellSize.width;
-    CGFloat cH = cellSize.height;
-    CGFloat cPW = spacing.width;
-    CGFloat cPH = spacing.height;
-    
-    NSInteger col = 1;
+    NSUInteger col = 1;
+    NSUInteger row = 1;
     
     if( W > cW ) {
     	col = ceilf((W-cW)/(cW+cPW));
     }
+    if( H > cH ) {
+        row = ceilf(H/(cH+cPH));
+    }
     
-    NSUInteger numberOfCells = self.numberOfCells;
+    NSUInteger numberOfCells = _numberOfCell;
     NSUInteger numberOfRows = numberOfCells/col + ( numberOfCells%col ? 1 : 0 );
     
     CGFloat h = numberOfRows*(cH+cPH)+cPH;
@@ -234,9 +285,68 @@
     
     scrollView.contentSize = contentSize;
     
-    _numberOfColumns = col;
-    _numberOfRows = numberOfRows;
+    _numberOfColumn = col;
+    _numberOfColumnInPage = col;
     
+    _numberOfRow = numberOfRows;
+    _numberOfRowInPage = row;
+    
+    _numberOfCellInPage = _numberOfColumnInPage*_numberOfRowInPage;
+}
+
+- (void)_resetContentSizeInHorizentalMode {
+    
+    UIScrollView* scrollView = self.scrollView;
+	CGRect bounds = scrollView.bounds;
+    
+    CGFloat W = bounds.size.width;
+    CGFloat H = bounds.size.height;
+    
+    CGFloat cW = _cellSize.width;
+    CGFloat cH = _cellSize.height;
+    CGFloat cPW = _cellSpacing.width;
+    CGFloat cPH = _cellSpacing.height;
+    
+    NSUInteger col = 1;
+    NSUInteger row = 1;
+    
+    if( W > cW ) {
+    	col = ceilf((W-cW)/(cW+cPW));
+    }
+    if( H > cH ) {
+        row = ceilf(H/(cH+cPH));
+    }
+    
+    NSUInteger numberOfCells = _numberOfCell;
+    NSUInteger numberOfCellInPage = col*row;
+    NSUInteger numberOfPage = numberOfCells/numberOfCellInPage + ( numberOfCells%numberOfCellInPage ? 1 : 0 );
+    
+    CGFloat contentWidth = numberOfPage*W;
+    
+    CGSize contentSize = CGSizeMake(contentWidth, H);
+    
+    scrollView.contentSize = contentSize;
+    
+    _numberOfColumn = col*numberOfPage;
+    _numberOfColumnInPage = col;
+    
+    _numberOfRow = row;
+    _numberOfRowInPage = row;
+    
+    _numberOfCellInPage = _numberOfColumnInPage*_numberOfRowInPage;
+}
+
+- (void)_resetContentSize {
+
+    id dataSource = self.dataSource;
+    _cellSize = [dataSource cellSizeOfGridView:self];
+    _cellSpacing = [dataSource cellSpacingOfGridView:self];
+
+    if( self.mode ) {
+        [self _resetContentSizeInHorizentalMode];
+    } else {
+        [self _resetContentSizeInVerticalMode];
+    }
 }
 
 
@@ -257,13 +367,14 @@
 
     [_recycledCells unionSet:set];
     [set release];
+
 }
 
-- (NSRange)_calculateVisibleRange {
-
+- (NSRange)_calculateVisibleRangeInVerticalMode {
+    
 	UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
-
+    
     CGFloat y = bounds.origin.y;
     if( y < 0 ) {
     	// the user has drag the content too low
@@ -273,21 +384,18 @@
     
     CGFloat H = bounds.size.height;
     
-    CGSize cellSize = self.cellSize;
-    CGSize spacing = self.cellSpacing;
+    CGFloat cH = _cellSize.height;
+    CGFloat cPH = _cellSpacing.height;
     
-    CGFloat cH = cellSize.height;
-    CGFloat cPH = spacing.height;
-    
-    NSInteger col = _numberOfColumns;
+    NSInteger col = _numberOfColumnInPage;
     
 	CGFloat rowHeight = cH + cPH;
     
     NSInteger row = floorf(y/rowHeight);
     
     NSInteger start = col*row;
-
-	NSInteger displayRow = ceilf(H/rowHeight);
+    
+	NSInteger displayRow = _numberOfRowInPage; // ceilf(H/rowHeight);
    	if( (row+displayRow)*rowHeight < y+H ) {
     	displayRow++;
     }
@@ -296,12 +404,74 @@
     
     NSUInteger end = start+count;
     
-    NSUInteger maxCount = self.numberOfCells;
+    NSUInteger maxCount = _numberOfCell;
     end = MIN(end, maxCount);
     
     NSRange range = NSMakeRange(start, end-start);
     
     return range;
+
+}
+
+- (NSRange)_calculateVisibleRangeInHorizentalMode {
+
+    UIScrollView* scrollView = self.scrollView;
+	CGRect bounds = scrollView.bounds;
+    
+    CGFloat x = bounds.origin.x;
+    if( x < 0 ) {
+    	// the user has drag the content too low
+        // just show from the first row
+    	x = 0;
+    }
+    
+    CGFloat W = bounds.size.width;
+    
+    NSInteger cW = _cellSize.width;
+    NSInteger cPW = _cellSpacing.width;
+    NSInteger cWPW = cW+cPW;
+    
+    NSUInteger col = _numberOfColumnInPage;
+    NSUInteger row = _numberOfRowInPage;
+    NSUInteger numberOfCellInPage = _numberOfCellInPage;
+    NSUInteger numberOfCell = _numberOfCell;
+    
+    NSInteger D = (W-((col-1)*cWPW+cW));
+    NSInteger D_2 = D/2;
+
+    NSUInteger startPage = floorf(x/W);
+    NSInteger a = x-W*startPage;
+    
+    NSInteger cellStartX = a - D_2;
+    NSInteger startColOffset = cellStartX/cWPW;
+    NSInteger start = numberOfCellInPage*startPage+startColOffset*row;
+    NSInteger end = start+numberOfCellInPage;
+
+    if( end <= _numberOfCell ) {
+        NSInteger nextPageHeadW = a - D_2;
+        if( nextPageHeadW > 0 ) {
+            // the end postion is in the next page
+            NSInteger numberOfColInPage2 = nextPageHeadW/cWPW+(nextPageHeadW%cWPW?1:0);
+            end += numberOfColInPage2*row;
+        }
+    }
+    
+    if( end > numberOfCell ) {
+        end = numberOfCell;
+    }
+    
+    NSRange range = NSMakeRange(start, end-start);
+    return range;
+    
+}
+
+- (NSRange)_calculateVisibleRange {
+
+    if( self.mode ) {
+        return [self _calculateVisibleRangeInHorizentalMode];
+    } else {
+        return [self _calculateVisibleRangeInVerticalMode];
+    }
 }
 
 - (void)_doCheckVisibility {
@@ -386,7 +556,11 @@
     [removedCells release];
     [insertedCells release];
     
-    [self _layoutCells];
+//    if( NSNotFound != _changeStartIndex ) {
+//        [self _layoutCellsFromIndex:_changeStartIndex];
+//    } else {
+        [self _layoutCellsFromIndex:0];
+//    }
 
 }
 
@@ -401,18 +575,19 @@
 #ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
     _needAnimateChange = NO;
 #endif
-    _changeStartIndex = NSNotFound;
     
    	[self _doCheckVisibility];
+    
+    _changeStartIndex = NSNotFound;
 }
 
 - (void)layoutSubviews {
 
 	[super layoutSubviews];
 
-	if( _numberOfCells ) {
+	if( _numberOfCell ) {
 		[self _resetContentSize];
-	    [self _layoutCells];
+	    [self _layoutCellsFromIndex:0];
     }
 }
 

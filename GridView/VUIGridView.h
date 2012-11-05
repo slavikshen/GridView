@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import "VUIGridCellView.h"
-#import "VUIGridViewLayoutDelegate.h"
 
 #define SRELEASE(x) { [x release]; x = nil; }
 #define IS_PIXEL_COORDINATE_CHANGED(a,b) (ABS(a-b)>1)
@@ -22,11 +21,20 @@
 #define VUIGRIDVIEW_DEFAULT_CELL_SIZE CGSizeMake(320, 240)
 #define VUIGRIDVIEW_DEFAULT_CELL_SPACING CGSizeMake(1, 20)
 
+typedef enum {
+
+    VUIGridViewMode_Vertical,
+    VUIGridViewMode_Horizental,
+
+} VUIGridViewMode;
+
 @class VUIGridView;
 
 @protocol VUIGridViewDataSource <NSObject>
 
 - (NSInteger)numberOfCellOfGridView:(VUIGridView*)gridView;
+- (CGSize)cellSizeOfGridView:(VUIGridView*)gridView;
+- (CGSize)cellSpacingOfGridView:(VUIGridView*)gridView;
 
 @optional
 
@@ -56,9 +64,12 @@
     
     BOOL _needCheckVisibility;
     
-    NSUInteger _numberOfCells;
-    NSUInteger _numberOfColumns;
-    NSUInteger _numberOfRows;
+    NSUInteger _numberOfCell;
+    NSUInteger _numberOfColumn;
+    NSUInteger _numberOfRow;
+    NSUInteger _numberOfColumnInPage;
+    NSUInteger _numberOfRowInPage;
+    NSUInteger _numberOfCellInPage;
     
     BOOL _delegateWillResponseClick;
 	BOOL _dataSourceWillUpgradeContent;
@@ -71,10 +82,12 @@
 
     NSUInteger _changeStartIndex;
     
+    CGSize _cellSize;
+    CGSize _cellSpacing;
+    
 }
 
-@property(nonatomic,readonly,assign) CGSize cellSize;
-@property(nonatomic,readonly,assign) CGSize cellSpacing;
+@property(nonatomic,assign) VUIGridViewMode mode;
 
 @property(nonatomic,assign) IBOutlet id<VUIGridViewDataSource> dataSource;
 @property(nonatomic,assign) IBOutlet id<VUIGridViewDelegate> delegate;
@@ -83,15 +96,13 @@
 
 @property(nonatomic,readonly,assign) UIScrollView* scrollView;
 
-@property(nonatomic,readonly,assign) NSUInteger numberOfCells;
-@property(nonatomic,readonly,assign) NSUInteger numberOfColumns;
-@property(nonatomic,readonly,assign) NSUInteger numberOfRows;
+@property(nonatomic,readonly,assign) NSUInteger numberOfCell;
+@property(nonatomic,readonly,assign) NSUInteger numberOfColumn;
+@property(nonatomic,readonly,assign) NSUInteger numberOfRow;
 
 - (void)setup;
 
 - (void)reloadData;
-
-- (void)setCellSize:(CGSize)cellSize andSpacing:(CGSize)cellSpacing animate:(BOOL)animated;
 
 - (void)insertCellAtIndex:(NSUInteger)index animated:(BOOL)animated;
 - (void)removeCellAtIndex:(NSUInteger)index animated:(BOOL)animated;

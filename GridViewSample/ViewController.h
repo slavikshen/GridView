@@ -24,6 +24,7 @@
 - (IBAction)reloadHead;
 - (IBAction)reloadMid;
 
+- (IBAction)switchMode;
 
 
 
