@@ -343,6 +343,9 @@
             [removedCells addObject:c];
             [self _cleanUpCellForRecycle:c];
             [c removeFromSuperview];
+        } else if( c.hidden ) {
+            // reset the cell animation state
+            c.hidden = NO;
         }
     }
     

@@ -500,12 +500,12 @@
         for( VUIGridCellView* c in _visibleCells ) {
         	// check all cells
             if( c.hidden ) {
-	            NSUInteger cellIndex = c.index;
-                for( IndexedLayer* l in layer.sublayers ) {
-					if( l.cellIndex == cellIndex ) {
+//	            NSUInteger cellIndex = c.index;
+//                for( IndexedLayer* l in layer.sublayers ) {
+//					if( l.cellIndex == cellIndex ) {
                     	c.hidden = NO;
-                    }
-                }
+//                    }
+//                }
             }
         }
         [layer removeFromSuperlayer];

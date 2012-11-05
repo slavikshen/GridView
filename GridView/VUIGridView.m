@@ -242,7 +242,7 @@
         VUIGridCellView* cell = [self _getMeACellOfIndex:newCellIndex];
         CGRect frame = [self _frameForCellAtIndex:newCellIndex];
         cell.frame = frame;
-        if( newCellIndex == index ) {
+        if( animated && newCellIndex == index ) {
             cell.hidden = YES;
         }
         
@@ -250,7 +250,7 @@
         [_visibleCells addObject:cell];
     }
     
-    if( !_needCheckVisibility ) {
+    if( !_needCheckVisibility && !_scrollView.dragging && !_scrollView.decelerating ) {
         if( animated ) {
             if( _changeStartIndex > newCellIndex )  {
                 _changeStartIndex = newCellIndex;
@@ -322,7 +322,7 @@
         }
     }
 
-    if( !_needCheckVisibility ) {
+    if( !_needCheckVisibility && !_scrollView.dragging && !_scrollView.decelerating ) {
         if( animated ) {
             if( _changeStartIndex > newCellIndex )  {
                 _changeStartIndex = newCellIndex;
