@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 Voyager Apps. All rights reserved.
 //
 
+#ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
+
 #import "VUIGridView+Ani.h"
 #import "VUIGridView+Layout.h"
 
@@ -515,4 +517,6 @@
 }
 
 @end
+
+#endif
  

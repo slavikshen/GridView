@@ -198,6 +198,8 @@
     }
 }
 
+#ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
+
 - (void)insertCellAtIndex:(NSUInteger)index animated:(BOOL)animated {
 	VUILog(@"VUIGridView insert cell at index %d", index);
         
@@ -364,6 +366,122 @@
     }
 
 }
+
+#else
+
+- (void)insertCellAtIndex:(NSUInteger)index animated:(BOOL)animated {
+	VUILog(@"VUIGridView insert cell at index %d", index);
+    
+    _numberOfCells = [_dataSource numberOfCellOfGridView:self];
+    [self _resetContentSize];
+    
+	NSRange visibleRange = [self _calculateVisibleRange];
+	NSUInteger start = visibleRange.location;
+    NSUInteger end = start + visibleRange.length;
+    
+    if( index >= end ) {
+    	// do nothing, since it is not visible at all
+    	return;
+    }
+    
+    NSUInteger newCellIndex = index;
+    
+	if( index < start ) {
+    	// the insert position is beyon the visible area
+        // make sure that the first visible cell is in the _visibleCells;
+        newCellIndex = start;
+    }
+    
+    // change the index of all visible cells after the index
+    for( VUIGridCellView* c in _visibleCells ) {
+        NSUInteger i = c.index;
+        if( NSNotFound != i && i >= index ) {
+        	i++;
+            [c _setIndex:i];
+        }
+    }
+    
+    if( _changeStartIndex > newCellIndex )  {
+        _changeStartIndex = newCellIndex;
+    }
+    
+    if( !_needCheckVisibility && !_scrollView.dragging && !_scrollView.decelerating ) {
+        [self _setNeedCheckVisibility];
+    }
+}
+
+- (void)removeCellAtIndex:(NSUInteger)index animated:(BOOL)animated {
+    
+    // calculate the old visible range first
+    NSRange visibleRange = [self _calculateVisibleRange];
+	NSUInteger start = visibleRange.location;
+    NSUInteger end = start + visibleRange.length;
+    
+    if( index >= end ) {
+    	// do nothing, since it is not visible at all
+    	return;
+    }
+    
+    NSUInteger newCellIndex = index;
+    
+	if( index < start ) {
+    	// the insert position is beyon the visible area
+        // make sure that the first visible cell is in the _visibleCells;
+        newCellIndex = start;
+    }
+    
+	VUILog(@"VUIGridView remove cell at index %d", index);
+    // change the index of all visible cells after the index
+    for( VUIGridCellView* c in _visibleCells ) {
+    	NSUInteger i = c.index;
+        if( NSNotFound != i ) {
+        	if( i == index ) {
+	        	[c _setIndex:NSNotFound];
+            } else if( i > index ) {
+            	[c _setIndex:i-1];
+            }
+        }
+    }
+    
+	// refresh content size now
+    _numberOfCells = [_dataSource numberOfCellOfGridView:self];
+    [self _resetContentSize];
+    
+    if( _changeStartIndex > newCellIndex )  {
+        _changeStartIndex = newCellIndex;
+    }    
+   
+    if( !_needCheckVisibility && !_scrollView.dragging && !_scrollView.decelerating ) {
+        [self _setNeedCheckVisibility];
+    }
+}
+
+- (void)reloadCellAtIndex:(NSUInteger)index animated:(BOOL)animated {
+    
+	VUILog(@"VUIGridView reload cell at index %d", index);
+    // replace a cell by replacing the existing one
+    // mark the exisiting cell as deleted;
+    BOOL found = NO;
+    for( VUIGridCellView* c in _visibleCells ) {
+        NSUInteger i = c.index;
+        if( NSNotFound != i && i == index ) {
+            [c _setIndex:NSNotFound];
+            found = YES;
+            break;
+        }
+    }
+    if( found ) {
+        if( _changeStartIndex > index )  {
+            _changeStartIndex = index;
+        }
+        if( !_needCheckVisibility && !_scrollView.dragging && !_scrollView.decelerating ) {
+            [self _setNeedCheckVisibility];
+        }
+    }
+}
+
+#endif
+
 
 - (id)cellAtIndex:(NSUInteger)index {
 	VUIGridCellView* cell = nil;

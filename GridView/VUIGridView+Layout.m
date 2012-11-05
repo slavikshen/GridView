@@ -397,8 +397,12 @@
     	return;
     }
 	_needCheckVisibility = NO;
+    
+#ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
     _needAnimateChange = NO;
+#endif
     _changeStartIndex = NSNotFound;
+    
    	[self _doCheckVisibility];
 }
 

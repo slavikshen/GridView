@@ -17,8 +17,6 @@
 
 - (void)_setNeedCheckVisibility;
 
-//- (void)_checkVisibilityNow;
-
 - (void)_removeAllVisibleCells;
 
 - (VUIGridCellView*)_getMeACellOfIndex:(NSUInteger)index;

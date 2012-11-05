@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "VUIGridCellView.h"
+#import "VUIGridViewLayoutDelegate.h"
 
 #define SRELEASE(x) { [x release]; x = nil; }
 #define IS_PIXEL_COORDINATE_CHANGED(a,b) (ABS(a-b)>1)
@@ -62,7 +63,12 @@
     BOOL _delegateWillResponseClick;
 	BOOL _dataSourceWillUpgradeContent;
     
+    #ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
+    
     BOOL _needAnimateChange;
+   
+    #endif
+
     NSUInteger _changeStartIndex;
     
 }

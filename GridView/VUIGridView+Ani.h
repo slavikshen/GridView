@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 Voyager Apps. All rights reserved.
 //
 
+#ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
+
 #import "VUIGridView.h"
 
 @interface VUIGridView (Ani)
@@ -16,3 +18,6 @@
 - (void)_animateReloadAtIndex:(NSUInteger)index;
 
 @end
+
+
+#endif

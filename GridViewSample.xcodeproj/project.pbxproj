@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7436E671164798F10014F2CA /* VUIGridViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 7436E670164798F10014F2CA /* VUIGridViewLayout.m */; };
 		7485A29F16398D11003AEB41 /* VUICoverView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7485A29016398D11003AEB41 /* VUICoverView.m */; };
 		7485A2A016398D11003AEB41 /* VUIGridCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7485A29316398D11003AEB41 /* VUIGridCellView.m */; };
 		7485A2A116398D11003AEB41 /* VUIGridViewUpdateCellContentOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 7485A29516398D11003AEB41 /* VUIGridViewUpdateCellContentOperation.m */; };
@@ -30,6 +31,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7436E66D1647948A0014F2CA /* VUIGridViewLayoutDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VUIGridViewLayoutDelegate.h; sourceTree = "<group>"; };
+		7436E66F164798F10014F2CA /* VUIGridViewLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VUIGridViewLayout.h; sourceTree = "<group>"; };
+		7436E670164798F10014F2CA /* VUIGridViewLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VUIGridViewLayout.m; sourceTree = "<group>"; };
 		7485A28F16398D11003AEB41 /* VUICoverView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VUICoverView.h; sourceTree = "<group>"; };
 		7485A29016398D11003AEB41 /* VUICoverView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VUICoverView.m; sourceTree = "<group>"; };
 		7485A29116398D11003AEB41 /* VUIGridCellView+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "VUIGridCellView+Private.h"; sourceTree = "<group>"; };
@@ -101,6 +105,9 @@
 				7485A29A16398D11003AEB41 /* VUIGridView+Private.h */,
 				7485A29D16398D11003AEB41 /* VUIGridView.h */,
 				7485A29E16398D11003AEB41 /* VUIGridView.m */,
+				7436E66D1647948A0014F2CA /* VUIGridViewLayoutDelegate.h */,
+				7436E66F164798F10014F2CA /* VUIGridViewLayout.h */,
+				7436E670164798F10014F2CA /* VUIGridViewLayout.m */,
 			);
 			path = GridView;
 			sourceTree = SOURCE_ROOT;
@@ -240,6 +247,7 @@
 				7485A2A316398D11003AEB41 /* VUIGridView+Layout.m in Sources */,
 				7485A2A516398D11003AEB41 /* VUIGridView.m in Sources */,
 				74D0212416456AE300790542 /* VUIGridView+ScrollViewDelegate.m in Sources */,
+				7436E671164798F10014F2CA /* VUIGridViewLayout.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
