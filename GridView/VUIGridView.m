@@ -14,7 +14,7 @@
 #import "VUIGridCellView+Private.h"
 #import "VUIGridViewUpdateCellContentOperation.h"
 
-//#import "VUIGridViewScrollView.h"
+#import "VUIGridViewScrollView.h"
 
 #import <QuartzCore/QuartzCore.h>
 
@@ -45,8 +45,6 @@
 @synthesize numberOfRow = _numberOfRow;
 
 - (void)setup {
-
-    _changeStartIndex = NSNotFound;
     
     _numberOfColumn = 1;
     _numberOfRow = 1;
@@ -57,8 +55,9 @@
 	_visibleCells = [[NSMutableSet alloc] initWithCapacity:MAX_GRID_VIEW_POOL_SIZE];
 	_recycledCells = [[NSMutableSet alloc] initWithCapacity:MAX_GRID_VIEW_POOL_SIZE];
 
-    UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
-    scrollView.delegate = self;
+    VUIGridViewScrollView* scrollView = [[VUIGridViewScrollView alloc] initWithFrame:self.bounds];
+    scrollView.gridView = self;
+//    scrollView.delegate = self;
     scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     scrollView.alwaysBounceVertical = YES;
     scrollView.bounces = YES;
@@ -378,15 +377,6 @@
     	// do nothing, since it is not visible at all
     	return;
     }
-    
-    NSUInteger newCellIndex = index;
-    
-	if( index < start ) {
-    	// the insert position is beyon the visible area
-        // make sure that the first visible cell is in the _visibleCells;
-        newCellIndex = start;
-    }
-    
     // change the index of all visible cells after the index
     for( VUIGridCellView* c in _visibleCells ) {
         NSUInteger i = c.index;
@@ -401,11 +391,7 @@
     [_visibleCells addObject:cell];
     [_scrollView addSubview:cell];    
     
-    if( _changeStartIndex > newCellIndex )  {
-        _changeStartIndex = newCellIndex;
-    }
-    
-    if( !_needCheckVisibility && !_scrollView.dragging && !_scrollView.decelerating ) {
+    if( !_scrollView.dragging && !_scrollView.decelerating ) {
         [self _setNeedCheckVisibility];
     }
 }
@@ -420,14 +406,6 @@
     if( index >= end ) {
     	// do nothing, since it is not visible at all
     	return;
-    }
-    
-    NSUInteger newCellIndex = index;
-    
-	if( index < start ) {
-    	// the insert position is beyon the visible area
-        // make sure that the first visible cell is in the _visibleCells;
-        newCellIndex = start;
     }
     
 	VUILog(@"VUIGridView remove cell at index %d", index);
@@ -446,12 +424,8 @@
 	// refresh content size now
     _numberOfCell = [_dataSource numberOfCellOfGridView:self];
     [self _resetContentSize];
-    
-    if( _changeStartIndex > newCellIndex )  {
-        _changeStartIndex = newCellIndex;
-    }    
-   
-    if( !_needCheckVisibility && !_scrollView.dragging && !_scrollView.decelerating ) {
+  
+    if( !_scrollView.dragging && !_scrollView.decelerating ) {
         [self _setNeedCheckVisibility];
     }
 }
@@ -471,10 +445,7 @@
         }
     }
     if( found ) {
-        if( _changeStartIndex > index )  {
-            _changeStartIndex = index;
-        }
-        if( !_needCheckVisibility && !_scrollView.dragging && !_scrollView.decelerating ) {
+        if( !_scrollView.dragging && !_scrollView.decelerating ) {
             [self _setNeedCheckVisibility];
         }
     }

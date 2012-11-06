@@ -69,17 +69,17 @@
 
 - (void)_setNeedCheckVisibility {
     
-    VUILog(@"_setNeedCheckVisibility");
-    if( _needCheckVisibility ) {
-    	// a request is already sent
-        // just wait
-        VUILog(@"just wait the previous request");
-    	return;
-    }
-    
-    _needCheckVisibility = YES;
-    [self performSelectorOnMainThread:@selector(_checkVisibilityNow) withObject:nil waitUntilDone:NO];
-//    [self.scrollView setNeedsLayout];
+//    VUILog(@"_setNeedCheckVisibility");
+//    if( _needCheckVisibility ) {
+//    	// a request is already sent
+//        // just wait
+//        VUILog(@"just wait the previous request");
+//    	return;
+//    }
+//    
+//    _needCheckVisibility = YES;
+//    [self performSelectorOnMainThread:@selector(_checkVisibilityNow) withObject:nil waitUntilDone:NO];
+    [self.scrollView setNeedsLayout];
 }
 
 - (void)_layoutCellsInVerticalModeFromIndex:(NSUInteger)index {
@@ -556,39 +556,14 @@
     [removedCells release];
     [insertedCells release];
     
-//    if( NSNotFound != _changeStartIndex ) {
-//        [self _layoutCellsFromIndex:_changeStartIndex];
-//    } else {
-        [self _layoutCellsFromIndex:0];
-//    }
-
-}
-
-- (void)_checkVisibilityNow {
-
-	if( !_needCheckVisibility ) {
-    	// everything is done
-    	return;
-    }
-	_needCheckVisibility = NO;
-    
-#ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
-    _needAnimateChange = NO;
-#endif
-    
-   	[self _doCheckVisibility];
-    
-    _changeStartIndex = NSNotFound;
+    [self _layoutCellsFromIndex:0];
 }
 
 - (void)layoutSubviews {
-
-	[super layoutSubviews];
-
 	if( _numberOfCell ) {
 		[self _resetContentSize];
-	    [self _layoutCellsFromIndex:0];
     }
+	[super layoutSubviews];
 }
 
 @end

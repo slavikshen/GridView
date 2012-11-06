@@ -22,8 +22,8 @@
 - (VUIGridCellView*)_getMeACellOfIndex:(NSUInteger)index;
 
 - (NSRange)_calculateVisibleRange;
-//- (void)_layoutCells;
 - (CGRect)_frameForCellAtIndex:(NSUInteger)index;
 
+- (void)_doCheckVisibility;
 
 @end

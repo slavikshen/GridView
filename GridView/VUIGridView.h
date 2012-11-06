@@ -62,8 +62,6 @@ typedef enum {
 	NSMutableSet* _visibleCells;
 	NSMutableSet* _recycledCells;
     
-    BOOL _needCheckVisibility;
-    
     NSUInteger _numberOfCell;
     NSUInteger _numberOfColumn;
     NSUInteger _numberOfRow;
@@ -79,8 +77,6 @@ typedef enum {
     BOOL _needAnimateChange;
    
     #endif
-
-    NSUInteger _changeStartIndex;
     
     CGSize _cellSize;
     CGSize _cellSpacing;
