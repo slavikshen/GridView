@@ -21,21 +21,26 @@
 	
     NSMutableArray* list = [NSMutableArray arrayWithCapacity:26];
     
-    for( char i = 'A'; i <= 'Z'; i++ ) {
-    	NSString* s = [NSString stringWithFormat:@"%c", i];
-        [list addObject:s];
-    }
-
-    for( char i = 'a'; i <= 'z'; i++ ) {
-    	NSString* s = [NSString stringWithFormat:@"%c", i];
-        [list addObject:s];
+    for( NSUInteger i = 0; i < 10; i++ ) {
+        NSString* str = [NSString stringWithFormat:@"%d", i];
+        [list addObject:str];
     }
     
-    for( char i = '0'; i <= '9'; i++ ) {
-    	NSString* s = [NSString stringWithFormat:@"%c", i];
-        [list addObject:s];
-    }
-
+//    for( char i = 'A'; i <= 'Z'; i++ ) {
+//    	NSString* s = [NSString stringWithFormat:@"%c", i];
+//        [list addObject:s];
+//    }
+//
+//    for( char i = 'a'; i <= 'z'; i++ ) {
+//    	NSString* s = [NSString stringWithFormat:@"%c", i];
+//        [list addObject:s];
+//    }
+//    
+//    for( char i = '0'; i <= '9'; i++ ) {
+//    	NSString* s = [NSString stringWithFormat:@"%c", i];
+//        [list addObject:s];
+//    }
+//
 //    for( char i = '0'; i <= '4'; i++ ) {
 //    	NSString* s = [NSString stringWithFormat:@"%c", i];
 //        [list addObject:s];
@@ -112,13 +117,22 @@
 
 	static NSUInteger i = 0;
 
-    NSUInteger index = _list.count/2;
+//    NSUInteger index = _list.count/2;
+//    
+//    for( NSUInteger x = 0; x < 2; x++ ) {
+//        NSString* text = [NSString stringWithFormat:@"M%d", i++];
+//        [_list insertObject:text atIndex:index];
+//        [_gridView insertCellAtIndex:index animated:YES];
+//    }
+
+    NSString* text = [NSString stringWithFormat:@"M%d", i++];
+    [_list insertObject:text atIndex:5];
+    [_list insertObject:text atIndex:7];
     
-    for( NSUInteger x = 0; x < 2; x++ ) {
-        NSString* text = [NSString stringWithFormat:@"M%d", i++];
-        [_list insertObject:text atIndex:index];
-        [_gridView insertCellAtIndex:index animated:YES];
-    }
+    [_gridView insertCellAtIndex:7 animated:YES];
+    [_gridView insertCellAtIndex:5 animated:YES];
+    //        [_gridView insertCellAtIndex:index animated:YES];
+
     
 }
 

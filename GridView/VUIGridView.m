@@ -395,6 +395,11 @@
             [c _setIndex:i];
         }
     }
+    // insert cell of the index
+    VUIGridCellView* cell = [self _getMeACellOfIndex:index];
+    cell.frame = [self _frameForCellAtIndex:index];
+    [_visibleCells addObject:cell];
+    [_scrollView addSubview:cell];    
     
     if( _changeStartIndex > newCellIndex )  {
         _changeStartIndex = newCellIndex;
