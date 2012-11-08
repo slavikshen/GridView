@@ -381,15 +381,14 @@
     for( VUIGridCellView* c in _visibleCells ) {
         NSUInteger i = c.index;
         if( NSNotFound != i && i >= index ) {
-        	i++;
-            [c _setIndex:i];
+            [c _setIndex: NSNotFound];
         }
     }
     // insert cell of the index
-    VUIGridCellView* cell = [self _getMeACellOfIndex:index];
-    cell.frame = [self _frameForCellAtIndex:index];
-    [_visibleCells addObject:cell];
-    [_scrollView addSubview:cell];    
+//    VUIGridCellView* cell = [self _getMeACellOfIndex:index];
+//    cell.frame = [self _frameForCellAtIndex:index];
+//    [_visibleCells addObject:cell];
+//    [_scrollView addSubview:cell];    
     
     if( !_scrollView.dragging && !_scrollView.decelerating ) {
         [self _setNeedCheckVisibility];
@@ -413,11 +412,14 @@
     for( VUIGridCellView* c in _visibleCells ) {
     	NSUInteger i = c.index;
         if( NSNotFound != i ) {
-        	if( i == index ) {
-	        	[c _setIndex:NSNotFound];
-            } else if( i > index ) {
-            	[c _setIndex:i-1];
+            if( i >= index ) {
+                [c _setIndex:NSNotFound];
             }
+//        	if( i == index ) {
+//	        	[c _setIndex:NSNotFound];
+//            } else if( i > index ) {
+//            	[c _setIndex:i-1];
+//            }
         }
     }
     
