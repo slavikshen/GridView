@@ -363,6 +363,18 @@
 
 #else
 
+- (void)beginUpdate {
+    _updating = YES;
+}
+
+- (void)endUpdate {
+    _updating = NO;
+    if( !_scrollView.dragging && !_scrollView.decelerating ) {
+        [self _setNeedCheckVisibility];
+    }
+}
+
+
 - (void)insertCellAtIndex:(NSUInteger)index animated:(BOOL)animated {
 	VUILog(@"VUIGridView insert cell at index %d", index);
     
@@ -390,7 +402,7 @@
 //    [_visibleCells addObject:cell];
 //    [_scrollView addSubview:cell];    
     
-    if( !_scrollView.dragging && !_scrollView.decelerating ) {
+    if( !_updating && !_scrollView.dragging && !_scrollView.decelerating ) {
         [self _setNeedCheckVisibility];
     }
 }
@@ -427,7 +439,7 @@
     _numberOfCell = [_dataSource numberOfCellOfGridView:self];
     [self _resetContentSize];
   
-    if( !_scrollView.dragging && !_scrollView.decelerating ) {
+    if( !_updating && !_scrollView.dragging && !_scrollView.decelerating ) {
         [self _setNeedCheckVisibility];
     }
 }
@@ -446,7 +458,7 @@
             break;
         }
     }
-    if( found ) {
+    if( !_updating && found ) {
         if( !_scrollView.dragging && !_scrollView.decelerating ) {
             [self _setNeedCheckVisibility];
         }

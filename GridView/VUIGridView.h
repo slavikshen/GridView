@@ -81,6 +81,7 @@ typedef enum {
     CGSize _cellSize;
     CGSize _cellSpacing;
     
+    BOOL _updating;    
 }
 
 @property(nonatomic,assign) VUIGridViewMode mode;
@@ -99,6 +100,8 @@ typedef enum {
 - (void)setup;
 
 - (void)reloadData;
+- (void)beginUpdate;
+- (void)endUpdate;
 
 - (void)insertCellAtIndex:(NSUInteger)index animated:(BOOL)animated;
 - (void)removeCellAtIndex:(NSUInteger)index animated:(BOOL)animated;
