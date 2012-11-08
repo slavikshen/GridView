@@ -477,6 +477,9 @@
 - (void)_doCheckVisibility {
 
 	VUILog(@"_doCheckVisibility");
+    if( _updating ) {
+        return;
+    }
     
 	// calculate the visible range
     NSRange visibleRange = [self _calculateVisibleRange];
