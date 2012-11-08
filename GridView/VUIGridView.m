@@ -57,7 +57,7 @@
         CGRect newShadowFrame =
         CGRectMake(0, 0, self.bounds.size.width, GRIDVIEW_SHADOW_HEIGHT);
         newShadow.frame = newShadowFrame;
-        CGColorRef darkColor = [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.8f].CGColor;
+        CGColorRef darkColor = [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.5f].CGColor;
         CGColorRef lightColor = [_scrollView.backgroundColor colorWithAlphaComponent:0.0].CGColor;
         newShadow.colors = [NSArray arrayWithObjects:
                             (id)(darkColor),

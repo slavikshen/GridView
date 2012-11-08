@@ -22,7 +22,7 @@
 #define VUIGRIDVIEW_DEFAULT_CELL_SPACING CGSizeMake(1, 20)
 
 
-#define GRIDVIEW_SHADOW_HEIGHT 10
+#define GRIDVIEW_SHADOW_HEIGHT 5
 
 typedef enum {
 
