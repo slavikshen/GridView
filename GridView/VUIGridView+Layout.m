@@ -119,6 +119,16 @@
             }
         }
     }
+    
+    
+    CGFloat y = bounds.origin.y;
+    if( y > _cellSpacing.height ) {
+        CGFloat alpha = (y/GRIDVIEW_SHADOW_HEIGHT*3);
+        if( alpha > 1 ) { alpha = 1; }
+        _topShadowLayer.opacity = alpha;
+    } else {
+        _topShadowLayer.opacity = 0;
+    }
 }
 
 - (void)_layoutCellsInHorizentalModeFromIndex:(NSUInteger)index {
@@ -165,6 +175,7 @@
             }
         }
     }
+    
 }
 
 - (void)_layoutCellsFromIndex:(NSUInteger)index {
@@ -564,6 +575,17 @@
 		[self _resetContentSize];
     }
 	[super layoutSubviews];
+}
+
+- (void)layoutSublayersOfLayer:(CALayer *)layer {
+    [super layoutSublayersOfLayer:layer];
+    if( layer == _topShadowLayer.superlayer ) {
+        CGRect frame = CGRectMake(0, 0, layer.bounds.size.width, GRIDVIEW_SHADOW_HEIGHT);
+        CGRect oldFrame = _topShadowLayer.frame;
+        if( IS_DIFFERENT_FRAME(frame, oldFrame) ) {
+            _topShadowLayer.frame = frame;
+        }
+    }
 }
 
 @end

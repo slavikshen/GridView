@@ -44,6 +44,32 @@
 @synthesize numberOfColumn = _numberOfColumn;
 @synthesize numberOfRow = _numberOfRow;
 
+
+- (void)_hideTopShadowLayer {
+    _topShadowLayer.opacity = 0;
+}
+
+- (void)_prepareTopShadowLayer {
+    
+    if( nil == _topShadowLayer ) {
+        // create shadow
+        CAGradientLayer *newShadow = [[CAGradientLayer alloc] init];
+        CGRect newShadowFrame =
+        CGRectMake(0, 0, self.bounds.size.width, GRIDVIEW_SHADOW_HEIGHT);
+        newShadow.frame = newShadowFrame;
+        CGColorRef darkColor = [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.8f].CGColor;
+        CGColorRef lightColor = [_scrollView.backgroundColor colorWithAlphaComponent:0.0].CGColor;
+        newShadow.colors = [NSArray arrayWithObjects:
+                            (id)(darkColor),
+                            (id)(lightColor),
+                            nil];
+        newShadow.zPosition = 1;
+        _topShadowLayer = newShadow;
+        
+        [self.layer addSublayer:_topShadowLayer];
+    }
+}
+
 - (void)setup {
     
     _numberOfColumn = 1;
@@ -78,6 +104,8 @@
     // default cell size
  	_cellSize = VUIGRIDVIEW_DEFAULT_CELL_SIZE;
    	_cellSpacing = VUIGRIDVIEW_DEFAULT_CELL_SPACING;
+    
+    [self _prepareTopShadowLayer];
 
 }
 
@@ -98,6 +126,9 @@
 }
 
 - (void)dealloc {
+    [_topShadowLayer release];
+    _topShadowLayer = nil;
+    
     if( _updateCellContentQueue ) {
         [_updateCellContentQueue cancelAllOperations];
         self.updateCellContentQueue = nil;
@@ -129,10 +160,18 @@
     return cell;
 }
 
+
 - (void)setMode:(VUIGridViewMode)mode {
     if( mode != _mode ) {
         _mode = mode;
-        _scrollView.pagingEnabled = (_mode?YES:NO);
+        if( VUIGridViewMode_Horizental == _mode ) {
+            _scrollView.pagingEnabled = YES;
+            [self _hideTopShadowLayer];
+
+        } else {
+            _scrollView.pagingEnabled = NO;
+        }
+        
         if( _numberOfCell ) {
             [self _resetContentSize];
             [self _setNeedCheckVisibility];

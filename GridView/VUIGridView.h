@@ -21,6 +21,9 @@
 #define VUIGRIDVIEW_DEFAULT_CELL_SIZE CGSizeMake(320, 240)
 #define VUIGRIDVIEW_DEFAULT_CELL_SPACING CGSizeMake(1, 20)
 
+
+#define GRIDVIEW_SHADOW_HEIGHT 10
+
 typedef enum {
 
     VUIGridViewMode_Vertical,
@@ -81,7 +84,9 @@ typedef enum {
     CGSize _cellSize;
     CGSize _cellSpacing;
     
-    BOOL _updating;    
+    BOOL _updating;
+    
+    CAGradientLayer* _topShadowLayer;
 }
 
 @property(nonatomic,assign) VUIGridViewMode mode;
