@@ -101,7 +101,8 @@
     NSInteger leftIndent = floorf((W-((col-1)*cWPW+cW))/2);
     NSInteger topIndent = cPH;
     
-	for( VUIGridCellView* c in _visibleCells ) {
+    NSSet* visibleCells = [[NSSet alloc] initWithSet:_visibleCells copyItems:NO];
+	for( VUIGridCellView* c in visibleCells ) {
     	NSUInteger i = c.index;
         if( NSNotFound != i && i >= index ) {
             NSUInteger cellCol = i % col;
@@ -119,7 +120,7 @@
             }
         }
     }
-    
+    [visibleCells release];    
     
     CGFloat y = bounds.origin.y;
     if( y > _cellSpacing.height ) {
@@ -144,7 +145,6 @@
     CGFloat cPH = _cellSpacing.height;
     
     NSUInteger col = _numberOfColumnInPage;
-    NSUInteger row = _numberOfRowInPage;
     NSUInteger numberOfCellInPage = _numberOfCellInPage;
     
     NSInteger cWPW = cW+cPW;
@@ -153,7 +153,8 @@
     NSInteger asideSpacing = (W-((col-1)*cWPW+cW));
     NSInteger topIndent = cPH;
     
-	for( VUIGridCellView* c in _visibleCells ) {
+    NSSet* visibleCells = [[NSSet alloc] initWithSet:_visibleCells copyItems:NO];
+	for( VUIGridCellView* c in visibleCells ) {
     	NSUInteger i = c.index;
         if( i != NSNotFound && i >= index ) {
         	// don't layout the deleted cells
@@ -176,7 +177,7 @@
             }
         }
     }
-    
+    [visibleCells release];
 }
 
 - (void)_layoutCellsFromIndex:(NSUInteger)index {
@@ -504,7 +505,8 @@
     NSMutableSet* removedCells = nil;
     NSMutableSet* insertedCells = nil;
     
-    for( VUIGridCellView* c in _visibleCells ) {
+    NSSet* visibleCells = [[NSSet alloc] initWithSet:_visibleCells copyItems:NO];
+    for( VUIGridCellView* c in visibleCells ) {
     	NSUInteger index = c.index;
     	if( NSNotFound == index ||
         	index < start ||
@@ -530,8 +532,14 @@
         }
     }
     
+    
     if( removedCells ) {
+    
 	    [_visibleCells minusSet:removedCells];
+        
+        [visibleCells release];
+        visibleCells = [[NSSet alloc] initWithSet:_visibleCells copyItems:NO];
+        
     	[_recycledCells unionSet:removedCells];
     }
 
@@ -557,6 +565,8 @@
             [scrollView addSubview:cell];
         }
     }
+    
+    [visibleCells release];
     
     if( insertedCells ) {
     	[_visibleCells unionSet:insertedCells];
