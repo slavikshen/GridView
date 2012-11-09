@@ -145,6 +145,7 @@
     CGFloat cPH = _cellSpacing.height;
     
     NSUInteger col = _numberOfColumnInPage;
+    NSUInteger row = _numberOfRowInPage;
     NSUInteger numberOfCellInPage = _numberOfCellInPage;
     
     NSInteger cWPW = cW+cPW;
