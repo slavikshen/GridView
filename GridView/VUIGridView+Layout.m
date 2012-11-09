@@ -131,7 +131,7 @@
     }
 }
 
-- (void)_layoutCellsInHorizentalModeFromIndex:(NSUInteger)index {
+- (void)_layoutCellsInHorizontalModeFromIndex:(NSUInteger)index {
 
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
@@ -161,9 +161,10 @@
             NSUInteger cellRow = i % row;
             
             NSUInteger pageIndex = i/numberOfCellInPage;
-            NSInteger leftIndent = asideSpacing*(pageIndex+1)-asideSpacing/2;
             
-            NSInteger x = leftIndent+cellCol*cWPW;
+            NSInteger leftIndent = W*pageIndex+asideSpacing/2;
+            
+            NSInteger x = leftIndent+(cellCol-pageIndex*_numberOfColumnInPage)*cWPW;
             NSInteger y = topIndent+cellRow*cHPH;
             
             CGRect newFrame = CGRectMake(x, y, cW, cH);
@@ -180,7 +181,7 @@
 
 - (void)_layoutCellsFromIndex:(NSUInteger)index {
     if( self.mode ) {
-        [self _layoutCellsInHorizentalModeFromIndex:index];
+        [self _layoutCellsInHorizontalModeFromIndex:index];
     } else {
         [self _layoutCellsInVerticalModeFromIndex:index];
     }
@@ -217,7 +218,7 @@
     
 }
 
-- (CGRect)_frameForCellInHorizentalModeAtIndex:(NSUInteger)index {
+- (CGRect)_frameForCellInHorizontalModeAtIndex:(NSUInteger)index {
 
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
@@ -240,14 +241,13 @@
     
     NSInteger asideSpacing = (W-((col-1)*cWPW+cW));
     
-    NSInteger leftIndent = asideSpacing*(pageIndex+1)-asideSpacing/2;
+    NSInteger leftIndent = W*pageIndex+asideSpacing/2;
     NSInteger topIndent = cPH;
-
     // don't layout the deleted cells
     NSUInteger cellCol = index / row;
     NSUInteger cellRow = index % row;
     
-    NSInteger x = leftIndent+cellCol*cWPW;
+    NSInteger x = leftIndent+(cellCol-pageIndex*_numberOfColumnInPage)*cWPW;
     NSInteger y = topIndent+cellRow*cHPH;
     
     CGRect frame = CGRectMake(x, y, cW, cH);
@@ -258,7 +258,7 @@
 
 - (CGRect)_frameForCellAtIndex:(NSUInteger)index {
     if( self.mode ) {
-        return [self _frameForCellInHorizentalModeAtIndex:index];
+        return [self _frameForCellInHorizontalModeAtIndex:index];
     } else {
         return [self _frameForCellInVerticalModeAtIndex:index];
     }
@@ -305,7 +305,7 @@
     _numberOfCellInPage = _numberOfColumnInPage*_numberOfRowInPage;
 }
 
-- (void)_resetContentSizeInHorizentalMode {
+- (void)_resetContentSizeInHorizontalMode {
     
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
@@ -354,7 +354,7 @@
     _cellSpacing = [dataSource cellSpacingOfGridView:self];
 
     if( self.mode ) {
-        [self _resetContentSizeInHorizentalMode];
+        [self _resetContentSizeInHorizontalMode];
     } else {
         [self _resetContentSizeInVerticalMode];
     }
@@ -424,7 +424,7 @@
 
 }
 
-- (NSRange)_calculateVisibleRangeInHorizentalMode {
+- (NSRange)_calculateVisibleRangeInHorizontalMode {
 
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
@@ -479,7 +479,7 @@
 - (NSRange)_calculateVisibleRange {
 
     if( self.mode ) {
-        return [self _calculateVisibleRangeInHorizentalMode];
+        return [self _calculateVisibleRangeInHorizontalMode];
     } else {
         return [self _calculateVisibleRangeInVerticalMode];
     }

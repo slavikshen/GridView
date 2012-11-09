@@ -164,12 +164,14 @@
 - (void)setMode:(VUIGridViewMode)mode {
     if( mode != _mode ) {
         _mode = mode;
-        if( VUIGridViewMode_Horizental == _mode ) {
-            _scrollView.pagingEnabled = YES;
+        UIScrollView* scrollView = _scrollView;
+        if( VUIGridViewMode_Horizontal == _mode ) {
+            scrollView.pagingEnabled = YES;
+            scrollView.alwaysBounceVertical = NO;
             [self _hideTopShadowLayer];
-
         } else {
-            _scrollView.pagingEnabled = NO;
+            scrollView.pagingEnabled = NO;
+            scrollView.alwaysBounceVertical = YES;
         }
         
         if( _numberOfCell ) {

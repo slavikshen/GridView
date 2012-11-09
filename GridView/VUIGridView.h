@@ -27,7 +27,7 @@
 typedef enum {
 
     VUIGridViewMode_Vertical,
-    VUIGridViewMode_Horizental,
+    VUIGridViewMode_Horizontal,
 
 } VUIGridViewMode;
 
