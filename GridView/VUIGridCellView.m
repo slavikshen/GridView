@@ -21,10 +21,35 @@
 @property(nonatomic,readwrite,assign) BOOL isRecycled;
 @end
 
-@implementation VUIGridCellView
+@implementation VUIGridCellView {
+
+#ifdef VUIGRIDVIEW_SHOW_CELL_INDEX
+    CALayer* _indexBgLayer;
+    CATextLayer* _cellIndexTextLayer;
+#endif
+
+}
 
 - (void)setup {
-	
+
+#ifdef VUIGRIDVIEW_SHOW_CELL_INDEX
+
+    _indexBgLayer = [CALayer layer];
+    _indexBgLayer.backgroundColor = [UIColor redColor].CGColor;
+    _indexBgLayer.frame = CGRectMake(0, 0, 32, 32);
+    
+    _cellIndexTextLayer = [CATextLayer layer];
+    _cellIndexTextLayer.foregroundColor = [UIColor whiteColor].CGColor;
+    _cellIndexTextLayer.fontSize = 14;
+    _cellIndexTextLayer.frame = _indexBgLayer.bounds;
+    
+    [_indexBgLayer addSublayer:_cellIndexTextLayer];
+    
+    _indexBgLayer.zPosition = 1;
+    [self.layer addSublayer:_indexBgLayer];
+    
+#endif
+    
 }
 
 - (void)dealloc {
@@ -56,6 +81,12 @@
 
 - (void)_setIndex:(NSUInteger)index {
 	self.index = index;
+    
+#ifdef VUIGRIDVIEW_SHOW_CELL_INDEX
+    _cellIndexTextLayer.string = [NSString stringWithFormat:@"%d", index];
+#endif
+    
+    
 }
 
 - (void)_setIsRecycled:(BOOL)flag {
