@@ -133,6 +133,13 @@
         [_updateCellContentQueue cancelAllOperations];
         self.updateCellContentQueue = nil;
     }
+    
+    for( VUIGridCellView* v in _visibleCells ) {
+        // make sure that all cell is cleaned
+        // there might be some async operation to clean
+        [self _cleanUpCellForRecycle:v];
+    }
+    
 	SRELEASE(_visibleCells);
     SRELEASE(_recycledCells);
 	_scrollView.delegate = nil;
