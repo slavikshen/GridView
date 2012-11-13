@@ -29,13 +29,23 @@
 }
 
 - (void)_clickCell:(VUIGridCellView*)cell {
-	if( _delegateWillResponseClick ) {
-        NSUInteger index = cell.index;
+    NSUInteger index = cell.index;
+    if( _delegateWillResponseDeselect && NSNotFound != _selectedIndex ) {
+        [self.delegate gridView:self didDeselectCellAtIndexPath:_selectedIndex];
+    }
+
+    VUIGridCellView* prevCell = [self cellAtIndex:_selectedIndex];
+    [prevCell setSelected:NO];
+    _selectedIndex = index;
+    [cell setSelected:YES];
+    
+	if( _delegateWillResponseSelect ) {
         if( NSNotFound != index ) {
             VUILog(@"click cell at index %d", index);
             [self.delegate gridView:self didSelectCellAtIndexPath:index];
         }
     }
+
 }
 
 - (void)_cleanUpCellForRecycle:(VUIGridCellView*)c {
@@ -59,7 +69,8 @@
     // make sure that the index is right
     [self _prepareCellForUse:cell];
     [cell _setIndex:index];
-    
+    [cell setSelected:(index == _selectedIndex)];
+
     if( _dataSourceWillUpgradeContent && VUIGridCellContentState_Draft == cell.contentState ) {
 		[self _requestUpdateCellContent:cell];
     }

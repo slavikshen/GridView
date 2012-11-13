@@ -43,7 +43,7 @@
 @synthesize numberOfCell = _numberOfCell;
 @synthesize numberOfColumn = _numberOfColumn;
 @synthesize numberOfRow = _numberOfRow;
-
+@synthesize selectedIndex =  _selectedIndex;
 
 - (void)_hideTopShadowLayer {
     _topShadowLayer.opacity = 0;
@@ -77,6 +77,8 @@
     _numberOfColumnInPage = 1;
     _numberOfRowInPage = 1;
     _numberOfCellInPage = 1;
+    
+    _selectedIndex = NSNotFound;
 
 	_visibleCells = [[NSMutableSet alloc] initWithCapacity:MAX_GRID_VIEW_POOL_SIZE];
 	_recycledCells = [[NSMutableSet alloc] initWithCapacity:MAX_GRID_VIEW_POOL_SIZE];
@@ -216,7 +218,8 @@
 	if( _delegate != delegate ) {
     	_delegate = delegate;
         
-        _delegateWillResponseClick = [_delegate respondsToSelector:@selector(gridView:didSelectCellAtIndexPath:)];
+        _delegateWillResponseSelect = [_delegate respondsToSelector:@selector(gridView:didSelectCellAtIndexPath:)];
+        _delegateWillResponseDeselect = [_delegate respondsToSelector:@selector(gridView:didDeselectCellAtIndexPath:)];
     }
 }
 

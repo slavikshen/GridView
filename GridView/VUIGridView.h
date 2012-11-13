@@ -52,6 +52,7 @@ typedef enum {
 @protocol VUIGridViewDelegate <NSObject, UIScrollViewDelegate>
 
 @optional
+- (void)gridView:(VUIGridView *)gridView didDeselectCellAtIndexPath:(NSUInteger)index;
 - (void)gridView:(VUIGridView *)gridView didSelectCellAtIndexPath:(NSUInteger)index;
 - (void)gridView:(VUIGridView *)gridView didShowCellAtIndex:(NSUInteger)index;
 - (void)gridView:(VUIGridView *)gridView didHideCellAtIndex:(NSUInteger)index;
@@ -72,7 +73,8 @@ typedef enum {
     NSUInteger _numberOfRowInPage;
     NSUInteger _numberOfCellInPage;
     
-    BOOL _delegateWillResponseClick;
+    BOOL _delegateWillResponseSelect;
+    BOOL _delegateWillResponseDeselect;
 	BOOL _dataSourceWillUpgradeContent;
     
     #ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
@@ -87,6 +89,8 @@ typedef enum {
     BOOL _updating;
     
     CAGradientLayer* _topShadowLayer;
+    
+    NSUInteger _selectedIndex;
 }
 
 @property(nonatomic,assign) VUIGridViewMode mode;
@@ -101,6 +105,8 @@ typedef enum {
 @property(nonatomic,readonly,assign) NSUInteger numberOfCell;
 @property(nonatomic,readonly,assign) NSUInteger numberOfColumn;
 @property(nonatomic,readonly,assign) NSUInteger numberOfRow;
+
+@property(nonatomic,readonly) NSUInteger selectedIndex;
 
 - (void)setup;
 
