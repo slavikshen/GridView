@@ -243,6 +243,7 @@
     }
 }
 
+
 #ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
 
 - (void)insertCellAtIndex:(NSUInteger)index animated:(BOOL)animated {

@@ -106,7 +106,7 @@ typedef enum {
 @property(nonatomic,readonly,assign) NSUInteger numberOfColumn;
 @property(nonatomic,readonly,assign) NSUInteger numberOfRow;
 
-@property(nonatomic,readonly) NSUInteger selectedIndex;
+@property(nonatomic,assign) NSUInteger selectedIndex;
 
 - (void)setup;
 

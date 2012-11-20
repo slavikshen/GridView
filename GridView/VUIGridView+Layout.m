@@ -18,6 +18,25 @@
 
 @implementation VUIGridView (Layout)
 
+
+- (void)setSelectedIndex:(NSUInteger)selectedIndex {
+
+    if( _selectedIndex == selectedIndex ) {
+        return;
+    }
+
+    if( NSNotFound != _selectedIndex ) {
+        VUIGridCellView* cell = [self cellAtIndex:_selectedIndex];
+        [cell setSelected:NO];
+    }
+    _selectedIndex = selectedIndex;
+    if( NSNotFound != _selectedIndex ) {
+        VUIGridCellView* cell = [self cellAtIndex:_selectedIndex];
+        [cell setSelected:YES];
+    }
+
+}
+
 - (void)_popRecycledCellsIfNecessary {
 
     NSUInteger max = ( self.mode ? _numberOfRowInPage : _numberOfColumnInPage );
@@ -34,6 +53,7 @@
         [self.delegate gridView:self didDeselectCellAtIndexPath:_selectedIndex];
     }
 
+    self.selectedIndex = index;
     VUIGridCellView* prevCell = [self cellAtIndex:_selectedIndex];
     [prevCell setSelected:NO];
     _selectedIndex = index;
