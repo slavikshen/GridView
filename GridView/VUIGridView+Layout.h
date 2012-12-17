@@ -26,4 +26,10 @@
 
 - (void)_doCheckVisibility;
 
+- (void)_scrollViewDidScrolled;
+
+- (void)_updateBackgoundViewFrame;
+
+- (id<VUIGVPullRrefrehViewProtocol>)_loadPullRefreshView;
+
 @end

@@ -17,6 +17,18 @@ typedef enum {
     
 } VUIGridCellContentState;
 
+typedef enum {
+
+    VUIGridCellHighlightStyle_None,
+    VUIGridCellHighlightStyle_Windows3D,
+    VUIGridCellHighlightStyle_RoundCorner,
+    
+    VUIGridCellHighlightStyle_GradientBlue,
+    VUIGridCellHighlightStyle_GradientRed,
+    VUIGridCellHighlightStyle_GradientGreen,
+
+} VUIGridCellHighlightStyle;
+
 typedef struct {
     NSUInteger column;
     NSUInteger row;
@@ -40,6 +52,8 @@ typedef struct {
 @property(nonatomic,readonly,assign) BOOL isRecycled;
 
 @property(nonatomic,assign) VUIGridCellContentState contentState;
+
+@property(nonatomic,assign) VUIGridCellHighlightStyle hightlightStyle;
 
 - (id)initWithIdentity:(NSString*) cellIdentity;
 

@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "VUIGridCellView.h"
+#import "VUIGVPullRrefrehViewProtocol.h"
+#import "VUIGVMoreView.h"
 
 #define SRELEASE(x) { [x release]; x = nil; }
 #define IS_PIXEL_COORDINATE_CHANGED(a,b) (ABS(a-b)>1)
@@ -21,8 +23,20 @@
 #define VUIGRIDVIEW_DEFAULT_CELL_SIZE CGSizeMake(320, 240)
 #define VUIGRIDVIEW_DEFAULT_CELL_SPACING CGSizeMake(1, 20)
 
-
 #define GRIDVIEW_SHADOW_HEIGHT 5
+
+//#define PULL_REFRESH_VIEW_HEIGHT_IPHONE 44
+//#define PULL_REFRESH_VIEW_HEIGHT_IPAD   64
+//#define PULL_REFRESH_VIEW_HEIGHT ( IS_PHONE ? PULL_REFRESH_VIEW_HEIGHT_IPHONE : PULL_REFRESH_VIEW_HEIGHT_IPAD )
+//#define PULL_REFRESH_VIEW_WIDTH 320
+//
+//#define MORE_VIEW_HEIGHT_IPHONE 44
+//#define MORE_VIEW_HEIGHT_IPAD   64
+//#define MORE_VIEW_HEIGHT ( IS_PHONE ? MORE_VIEW_HEIGHT_IPHONE : MORE_VIEW_HEIGHT_IPAD )
+//#define MORE_VIEW_WIDTH 320
+
+
+#define MAX_PULL_REFRESH_TAIL_LENGTH_FOR_RECOGNIZING 36
 
 typedef enum {
 
@@ -30,6 +44,22 @@ typedef enum {
     VUIGridViewMode_Horizontal,
 
 } VUIGridViewMode;
+
+typedef enum {
+
+    VUIGridViewPullRefreshState_Idle,
+    VUIGridViewPullRefreshState_Dragging,
+    VUIGridViewPullRefreshState_Recognized,
+    VUIGridViewPullRefreshState_Refreshing
+
+} VUIGridViewPullRefreshIndicatorState;
+
+typedef enum {
+
+    VUIGridViewMoreState_Idle,
+    VUIGridViewMoreState_Refreshing
+
+} VUIGridViewMoreIndicatorState;
 
 @class VUIGridView;
 
@@ -57,6 +87,17 @@ typedef enum {
 - (void)gridView:(VUIGridView *)gridView didShowCellAtIndex:(NSUInteger)index;
 - (void)gridView:(VUIGridView *)gridView didHideCellAtIndex:(NSUInteger)index;
 
+// if the delegate implemented gridViewDidRequestRefresh:, then there will be a pull refresh indicator in the gridview
+- (void)gridViewDidRequestRefresh:(VUIGridView *)gridView;
+- (id<VUIGVPullRrefrehViewProtocol>)pullRefreshViewForGridView:(VUIGridView*)gridView;
+
+// if the delegate implemented gridViewDidRequestMore:, then there will be a more indicator in the gridview
+- (void)gridViewDidRequestMore:(VUIGridView *)gridView;
+- (id<VUIGVPullRrefrehViewProtocol>)moreViewForGridView:(VUIGridView*)gridView;
+
+- (BOOL)isThereMoreDataForGridView:(VUIGridView *)gridView;
+
+
 @end
 
 
@@ -75,7 +116,11 @@ typedef enum {
     
     BOOL _delegateWillResponseSelect;
     BOOL _delegateWillResponseDeselect;
+    BOOL _delegateWillResponseRefresh;
+    BOOL _delegateWillResponseMore;
+    
 	BOOL _dataSourceWillUpgradeContent;
+
     
     #ifdef ENABLE_GRIDVIEW_ANIMATION_CHANGE
     
@@ -91,6 +136,7 @@ typedef enum {
     CAGradientLayer* _topShadowLayer;
     
     NSUInteger _selectedIndex;
+
 }
 
 @property(nonatomic,assign) VUIGridViewMode mode;
@@ -108,6 +154,17 @@ typedef enum {
 
 @property(nonatomic,assign) NSUInteger selectedIndex;
 
+@property(nonatomic,readonly,assign) VUIGridViewPullRefreshIndicatorState pullRefreshIndicatorState;
+@property(nonatomic,readonly,assign) VUIGridViewMoreIndicatorState moreIndicatorState;
+
+@property(nonatomic,retain) id<VUIGVPullRrefrehViewProtocol> pullRefreshView;
+@property(nonatomic,retain) id<VUIGVPullRrefrehViewProtocol> moreView;
+
+@property(nonatomic,assign) BOOL showTopShadow;
+
+@property(nonatomic,retain) UIView* backgroundView;
+@property(nonatomic,retain) UIView* emptyView;
+
 - (void)setup;
 
 - (void)reloadData;
@@ -118,9 +175,22 @@ typedef enum {
 - (void)removeCellAtIndex:(NSUInteger)index animated:(BOOL)animated;
 - (void)reloadCellAtIndex:(NSUInteger)index animated:(BOOL)animated;
 
+- (void)insertCellsAtIndexes:(NSIndexSet*)indexes animated:(BOOL)animated;
+- (void)removeCellsAtIndexex:(NSIndexSet*)indexes animated:(BOOL)animated;
+- (void)reloadCellsAtIndexes:(NSIndexSet*)indexes animated:(BOOL)animated;
+
 - (id)dequeueGridCellViewFromPool:(NSString*)cellID;
 
 - (id)cellAtIndex:(NSUInteger)index;
+
+- (void)setRefreshIndicatorState:(VUIGridViewPullRefreshIndicatorState)state animated:(BOOL)animated;
+- (void)setMoreIndicatorState:(VUIGridViewMoreIndicatorState)state animated:(BOOL)animated;
+
+- (NSString*)textForPullRefreshIndicatorState:(VUIGridViewPullRefreshIndicatorState)state;
+- (NSString*)textForMoreIndicatorState:(VUIGridViewMoreIndicatorState)state;
+- (void)setText:(NSString*)text forPullRefreshIndicatorState:(VUIGridViewPullRefreshIndicatorState)state;
+- (void)setText:(NSString*)text forMoreIndicatorState:(VUIGridViewMoreIndicatorState)state;
+
 
 @end
 

@@ -155,7 +155,7 @@
     
     CGFloat y = bounds.origin.y;
     if( y > _cellSpacing.height ) {
-        CGFloat alpha = (y/GRIDVIEW_SHADOW_HEIGHT*3);
+        CGFloat alpha = ABS(y/GRIDVIEW_SHADOW_HEIGHT*3);
         if( alpha > 1 ) { alpha = 1; }
         _topShadowLayer.opacity = alpha;
     } else {
@@ -391,6 +391,46 @@
     } else {
         [self _resetContentSizeInVerticalMode];
     }
+    
+    id<VUIGVPullRrefrehViewProtocol> more = self.moreView;
+    if( more ) {
+    
+        UIView* moreView = (UIView*)more;
+        
+        UIScrollView* scrollView = self.scrollView;
+        
+        CGSize contentSize = scrollView.contentSize;
+        CGRect frame = moreView.frame;
+        frame.origin.y = contentSize.height;
+        frame.origin.x = floorf((contentSize.width-frame.size.width)/2);
+        
+        moreView.frame = frame;
+    }
+    
+    [self _updateBackgoundViewFrame];
+}
+
+- (void)_updateBackgoundViewFrame {
+    
+    UIView* bgView = self.backgroundView;
+    if( bgView ) {
+
+        UIScrollView* scrollView = self.scrollView;
+        CGSize contentSize = scrollView.contentSize;
+        
+        CGFloat cw = contentSize.width;
+        CGFloat ch = contentSize.height;
+        CGSize bsize = scrollView.bounds.size;
+        CGFloat bw = bsize.width;
+        CGFloat bh = bsize.height;
+        
+        CGFloat bgW = MAX(cw,bw);
+        CGFloat bgH = MAX(ch,bh);
+                    
+        CGRect bgFrame = CGRectMake(0,0, bgW, bgH);
+        
+        self.backgroundView.frame = bgFrame;
+    }
 }
 
 
@@ -609,7 +649,21 @@
     [removedCells release];
     [insertedCells release];
     
-    [self _layoutCellsFromIndex:0];
+    UIView* emptyView = self.emptyView;
+    
+    if( _visibleCells.count ) {
+        if( emptyView.superview ) {
+            [emptyView removeFromSuperview];
+        }
+        [self _layoutCellsFromIndex:0];
+    } else {
+        if( nil == emptyView.superview ) {
+            // show emptyView
+            emptyView.autoresizingMask = UIViewAutoresizingFlexibleSize;
+            emptyView.frame = self.bounds;
+            [self addSubview:emptyView];
+        }
+    }
 }
 
 - (void)layoutSubviews {
@@ -628,6 +682,133 @@
             _topShadowLayer.frame = frame;
         }
     }
+}
+
+- (id<VUIGVPullRrefrehViewProtocol>)_loadPullRefreshView {
+    id delegate = self.delegate;
+    id<VUIGVPullRrefrehViewProtocol> refresh = [delegate pullRefreshViewForGridView:self];
+    NSAssert([refresh isKindOfClass:[UIView class]],@"pullRefreshViewForGridView must return an instance of UIView");
+
+    self.pullRefreshView = refresh;
+    
+    NSString* text = [self textForPullRefreshIndicatorState:self.pullRefreshIndicatorState];
+    [refresh setTitle:text];
+    
+    UIView* refreshView = (UIView*)refresh;
+    UIScrollView* scrollView = self.scrollView;
+    
+    CGRect bounds = scrollView.bounds;
+
+    CGSize preferredSize = [refreshView sizeThatFits:bounds.size];
+    CGFloat pW = preferredSize.width;
+    CGFloat pH = preferredSize.height;
+        
+    CGRect frame = CGRectMake(floorf((bounds.size.width-pW)/2), -pH, pW, pH);
+    
+    UIView* bgView = self.backgroundView;
+    if( bgView ) {
+        [scrollView insertSubview:refreshView aboveSubview:bgView];
+    } else {
+        [scrollView insertSubview:refreshView atIndex:0];
+    }
+    
+    refreshView.frame = frame;
+    
+    return refresh;
+}
+
+- (void)_checkPullRefreshView {
+
+    id<VUIGVPullRrefrehViewProtocol> refresh = self.pullRefreshView;
+    UIView* refreshView = (UIView*)refresh;
+
+    UIScrollView* scrollView = self.scrollView;
+    CGRect bounds = scrollView.bounds;
+    CGFloat y = bounds.origin.y;
+    
+    if( y < 0 && nil == refresh ) {
+        refresh = [self _loadPullRefreshView];
+        refreshView = (UIView*)refresh;
+    }
+        
+    CGRect frame = refreshView.frame;
+    
+    CGSize preferredSize = [refreshView sizeThatFits:bounds.size];
+    CGFloat pW = preferredSize.width;
+    CGFloat pH = preferredSize.height;
+    
+    VUIGridViewPullRefreshIndicatorState state = self.pullRefreshIndicatorState;
+    
+    CGRect newFrame = CGRectMake(floorf((bounds.size.width-pW)/2), -pH, pW, pH);
+    
+    if( y < -pH ) {
+        
+        newFrame.origin.y = y;
+        newFrame.size.height = -y;
+        
+        refreshView.frame = frame;
+        CGFloat dragDisance = -(y+pH);
+
+        if( scrollView.dragging ) { 
+            // user is dragging
+            if( dragDisance > MAX_PULL_REFRESH_TAIL_LENGTH_FOR_RECOGNIZING && state < VUIGridViewPullRefreshState_Recognized ) {
+                [self _setRefreshIndicatorState:VUIGridViewPullRefreshState_Recognized];
+            } else if( state < VUIGridViewPullRefreshState_Dragging ) {
+                [self _setRefreshIndicatorState:VUIGridViewPullRefreshState_Dragging];
+            }
+        }
+        
+    } else {
+    
+        if( VUIGridViewPullRefreshState_Recognized == state ) {
+            [self _setRefreshIndicatorState:VUIGridViewPullRefreshState_Refreshing];
+        }
+        
+    }
+
+    if( IS_DIFFERENT_FRAME( frame, newFrame) ) {
+        refreshView.frame = newFrame;
+    }
+    
+}
+
+- (void)_checkMoreView {
+
+    id<VUIGVPullRrefrehViewProtocol> more = self.moreView;
+    if( more ) {
+        
+        UIView* moreView = (UIView*)more;
+    
+        UIScrollView* scrollView = self.scrollView;
+        
+        BOOL hidden = ![self.delegate isThereMoreDataForGridView:self];
+        if( hidden != moreView.hidden ) {
+            moreView.hidden = hidden;
+        }
+
+        if( !hidden ) {
+            CGRect bounds = scrollView.bounds;
+            CGFloat b = bounds.origin.y + bounds.size.height;
+            
+            if( b >= scrollView.contentSize.height ) {
+                [self _setMoreIndicatorState:VUIGridViewMoreState_Refreshing];
+            }
+        }
+    }
+
+}
+
+- (void)_scrollViewDidScrolled {
+
+    if( _delegateWillResponseRefresh ) {
+        [self _checkPullRefreshView];
+    }
+    if( _delegateWillResponseMore ) {
+        [self _checkMoreView];
+    }
+    
+    [self _doCheckVisibility];
+
 }
 
 @end

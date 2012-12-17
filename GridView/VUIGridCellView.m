@@ -8,6 +8,7 @@
 
 #import "VUIGridCellView.h"
 #import "VUIGridCellView+Private.h"
+#import "VUIGridCellHightlightView.h"
 
 #ifdef VUI_DEBUG_VUIGRIDVIEW
 #    define VUILog(...) NSLog(__VA_ARGS__)
@@ -16,9 +17,12 @@
 #endif
 
 @interface VUIGridCellView()
+
 @property(nonatomic,readwrite,copy) NSString* cellIdentity;
 @property(nonatomic,readwrite,assign) NSUInteger index;
 @property(nonatomic,readwrite,assign) BOOL isRecycled;
+@property(nonatomic,assign) VUIGridCellHightlightView* hightlightView;
+
 @end
 
 @implementation VUIGridCellView {
@@ -72,6 +76,35 @@
 }
 
 - (void)queuedIntoPool {
+
+}
+
+- (void)setHightlightStyle:(VUIGridCellHighlightStyle)hightlightStyle {
+    _hightlightStyle = hightlightStyle;
+    _hightlightView.style = hightlightStyle;
+}
+
+- (void)setHighlighted:(BOOL)highlighted {
+
+    if( self.highlighted != highlighted ) {
+        [super setHighlighted:highlighted];
+        if( highlighted ) {
+            if( _hightlightStyle ) {
+                if( nil == _hightlightView ) {
+                    VUIGridCellHightlightView* highlightView = [[VUIGridCellHightlightView alloc] initWithFrame:self.bounds];
+                    highlightView.autoresizingMask = UIViewAutoresizingFlexibleSize;
+                    highlightView.style = _hightlightStyle;
+                    [self insertSubview:highlightView atIndex:0];
+                    self.hightlightView = highlightView;
+                    [highlightView release];
+                } else {
+                    _hightlightView.hidden = NO;
+                }
+            }
+        } else {
+            _hightlightView.hidden = YES;
+        }
+    }
 
 }
 

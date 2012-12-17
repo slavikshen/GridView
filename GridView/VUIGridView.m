@@ -28,17 +28,24 @@
 
 @interface VUIGridView()
 
-@property(nonatomic,readwrite,assign) UILabel* emtpyHintLabel;
-
 @property(nonatomic,readwrite,assign) UIScrollView* scrollView;
 
 @property(nonatomic,readwrite,assign) NSRange visibleRange;
 
 @property(nonatomic,retain) NSOperationQueue* updateCellContentQueue;
 
+@property(nonatomic,readwrite,assign) VUIGridViewPullRefreshIndicatorState pullRefreshIndicatorState;
+@property(nonatomic,readwrite,assign) VUIGridViewMoreIndicatorState moreIndicatorState;
+
+
 @end
 
-@implementation VUIGridView
+@implementation VUIGridView {
+
+    NSMutableDictionary* _pullRefreshIndicatorTexts;
+    NSMutableDictionary* _moreIndicatorTexts;
+
+}
 
 @synthesize numberOfCell = _numberOfCell;
 @synthesize numberOfColumn = _numberOfColumn;
@@ -128,8 +135,11 @@
 }
 
 - (void)dealloc {
-    [_topShadowLayer release];
-    _topShadowLayer = nil;
+
+    SRELEASE(_pullRefreshView);
+    SRELEASE(_emptyView);
+    SRELEASE(_backgroundView);
+    SRELEASE(_topShadowLayer);
     
     if( _updateCellContentQueue ) {
         [_updateCellContentQueue cancelAllOperations];
@@ -144,6 +154,7 @@
     
 	SRELEASE(_visibleCells);
     SRELEASE(_recycledCells);
+    
 	_scrollView.delegate = nil;
     [super dealloc];
 }
@@ -167,6 +178,22 @@
         [cell _setIsRecycled:NO];
     }
     return cell;
+}
+
+- (void)setBackgroundView:(UIView *)backgroundView {
+
+    if( _backgroundView ) {
+        [_backgroundView removeFromSuperview];
+        [_backgroundView release];
+    }
+    _backgroundView = [backgroundView retain];
+    if( _backgroundView ) {
+        [_scrollView insertSubview:_backgroundView atIndex:0];
+        _backgroundView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
+        CGSize contentSize = _scrollView.contentSize;
+        CGRect bgFrame = CGRectMake(0, 0, contentSize.width, contentSize.height);
+        _backgroundView.frame = bgFrame;
+    }
 }
 
 
@@ -216,11 +243,237 @@
 
 - (void)setDelegate:(id<VUIGridViewDelegate>)delegate {
 	if( _delegate != delegate ) {
-    	_delegate = delegate;
+    	
+        _delegate = delegate;
+
+        SRELEASE(_pullRefreshIndicatorTexts);
+        SRELEASE(_moreIndicatorTexts);
         
-        _delegateWillResponseSelect = [_delegate respondsToSelector:@selector(gridView:didSelectCellAtIndexPath:)];
-        _delegateWillResponseDeselect = [_delegate respondsToSelector:@selector(gridView:didDeselectCellAtIndexPath:)];
+        if( _delegate ) {
+        
+            _delegateWillResponseSelect = [_delegate respondsToSelector:@selector(gridView:didSelectCellAtIndexPath:)];
+            _delegateWillResponseDeselect = [_delegate respondsToSelector:@selector(gridView:didDeselectCellAtIndexPath:)];
+            _delegateWillResponseRefresh = [_delegate respondsToSelector:@selector(gridViewDidRequestRefresh:)];
+            _delegateWillResponseMore = [_delegate respondsToSelector:@selector(gridViewDidRequestMore:)];
+            
+            if( _delegateWillResponseRefresh ) {
+                
+                NSDictionary* defs = @{
+                    @(VUIGridViewPullRefreshState_Idle): _L(@"Pull to refresh"),
+                    @(VUIGridViewPullRefreshState_Dragging): _L(@"Pull to refresh"),
+                    @(VUIGridViewPullRefreshState_Recognized): _L(@"Release to start refresh"),
+                    @(VUIGridViewPullRefreshState_Refreshing): _L(@"Refreshing")
+                };
+                _pullRefreshIndicatorTexts = [[NSMutableDictionary alloc] initWithDictionary:defs];
+            } else {
+                if( _pullRefreshView ) {
+                    [(UIView*)_pullRefreshView removeFromSuperview];
+                    self.pullRefreshView = nil;
+                };
+            }
+            
+            if( _delegateWillResponseMore ) {
+                NSDictionary* defs = @{
+                    @(VUIGridViewMoreState_Idle): _L(@"More"),
+                    @(VUIGridViewMoreState_Refreshing): _L(@"Loading")
+                };
+                _moreIndicatorTexts = [[NSMutableDictionary alloc] initWithDictionary:defs];
+                
+                //TODO: create more indicator if necessary
+                
+                if( nil == _moreView ) {
+                
+                    
+                    
+                    id<VUIGVPullRrefrehViewProtocol> more = [_delegate moreViewForGridView:self];
+                    NSAssert( [more isKindOfClass:[UIView class]], @"moreViewForGridView must return an instance of UIView" );
+                    
+                    UIView* moreView = (UIView*)more;
+                    moreView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+                    
+                    CGRect frame = _scrollView.frame;
+                    CGSize preferredSize = [moreView sizeThatFits:frame.size];
+                    CGSize contentSize = _scrollView.contentSize;
+                    
+                    CGRect moreFrame = CGRectMake(floorf((frame.size.width-preferredSize.width)/2), contentSize.height, preferredSize.width, preferredSize.height);
+                    moreView.frame = moreFrame;
+                    [_scrollView  addSubview:moreView];
+                    
+                    self.moreView = more;
+                    
+                    UIEdgeInsets inset = _scrollView.contentInset;
+                    inset.bottom = preferredSize.height;
+                    _scrollView.contentInset = inset;
+                }
+                
+                _moreView.title = [self textForMoreIndicatorState:VUIGridViewMoreState_Idle];
+                
+            } else {
+                if( _moreView ) {
+                    [(UIView*)_moreView removeFromSuperview];
+                    self.moreView = nil;
+                    
+                    UIEdgeInsets inset = _scrollView.contentInset;
+                    inset.bottom = 0;
+                    _scrollView.contentInset = inset;
+                }
+            }
+        
+        } else {
+        
+            _delegateWillResponseSelect = NO;
+            _delegateWillResponseDeselect = NO;
+            _delegateWillResponseRefresh = NO;
+            _delegateWillResponseMore = NO;
+            
+            if( _pullRefreshView ) {
+                [(UIView*)_pullRefreshView removeFromSuperview];
+                self.pullRefreshView = nil;
+            };
+            if( _moreView ) {
+                [(UIView*)_moreView removeFromSuperview];
+                self.moreView = nil;
+                
+                UIEdgeInsets inset = _scrollView.contentInset;
+                inset.bottom = 0;
+                _scrollView.contentInset = inset;
+            }
+        
+        }
     }
+}
+
+- (void)setRefreshIndicatorState:(VUIGridViewPullRefreshIndicatorState)state animated:(BOOL)animated {
+
+    if( state != _pullRefreshIndicatorState ) {
+    
+        _pullRefreshIndicatorState = state;
+        
+        UIScrollView* scrollView = _scrollView;
+        id<VUIGVPullRrefrehViewProtocol> refresh = _pullRefreshView;
+        UIView* refreshView = (UIView*)refresh;
+        
+        NSString* text = [self textForPullRefreshIndicatorState:_pullRefreshIndicatorState];
+        
+        CGFloat topInset = 0;
+        BOOL activeAni = NO;
+        
+        id<VUIGridViewDelegate> delegate = self.delegate;
+        
+        if( VUIGridViewPullRefreshState_Refreshing == state ||
+            VUIGridViewPullRefreshState_Recognized == state
+        ) {
+            if( nil == refresh ) {
+                refresh = [self _loadPullRefreshView];
+                refreshView = (UIView*)refresh;
+            }
+            CGRect frame = scrollView.frame;
+            CGSize preferredSize = [refreshView sizeThatFits:frame.size];
+            topInset = preferredSize.height;
+        }
+        if( VUIGridViewPullRefreshState_Refreshing == state ) {
+            VUIGridView* s = self;
+            dispatch_async(dispatch_get_main_queue(), ^() {
+                [delegate gridViewDidRequestRefresh:s];
+            });
+            activeAni = YES;
+        }
+
+        CGFloat currentTopInset = scrollView.contentInset.top;
+        if( topInset != currentTopInset ) {
+
+            UIEdgeInsets inset = scrollView.contentInset;
+            inset.top = topInset;
+
+            [refresh setTitle:text];
+            
+//            if( VUIGridViewPullRefreshState_Idle == state ) {
+//                CGFloat y = scrollView.contentOffset.y;
+//                if( y != 0 ) {
+//                    [scrollView setContentOffset:CGPointMake(0, 0) animated:animated];
+//                }
+//            }
+            
+            if( animated ) {
+                [UIView animateWithDuration:0.3f animations:^() {
+                    [scrollView setContentInset:inset];
+                    if( VUIGridViewPullRefreshState_Idle == state || VUIGridViewPullRefreshState_Refreshing == state ) {
+                        [scrollView setContentOffset:CGPointMake(0, -inset.top) animated:YES];
+                    }                    
+                }];
+            } else {
+                [scrollView setContentInset:inset];
+                if( VUIGridViewPullRefreshState_Idle == state || VUIGridViewPullRefreshState_Refreshing == state ) {
+                    [scrollView setContentOffset:CGPointMake(0, -inset.top) animated:YES];
+                }
+            }
+        } else {
+           [refresh setTitle:text];
+        }
+
+        if( activeAni != [refresh activeAnimation] ) {
+            [refresh setActiveAnimation:activeAni];
+        }
+    
+    }
+
+}
+
+- (void)setMoreIndicatorState:(VUIGridViewMoreIndicatorState)state animated:(BOOL)animated {
+
+    if( state != _moreIndicatorState ) {
+    
+        _moreIndicatorState = state;
+        
+        NSString* text = [self textForMoreIndicatorState:_moreIndicatorState];
+        _moreView.title = text;
+
+        BOOL activeAni = NO;
+        
+        if( VUIGridViewMoreState_Refreshing == state ) {
+            activeAni = YES;
+        }
+        
+        UIView* moreView = (UIView*)_moreView;
+        moreView.hidden = ![_delegate isThereMoreDataForGridView:self];
+        
+        _moreView.activeAnimation = activeAni;
+    }
+    
+
+}
+
+
+- (NSString*)textForPullRefreshIndicatorState:(VUIGridViewPullRefreshIndicatorState)state {
+    
+    NSNumber* key = @(state);
+    NSString* text = [_pullRefreshIndicatorTexts objectForKey:key];
+    
+    return text;
+    
+}
+
+- (NSString*)textForMoreIndicatorState:(VUIGridViewMoreIndicatorState)state {
+
+    NSNumber* key = @(state);
+    NSString* text = [_moreIndicatorTexts objectForKey:key];
+    
+    return text;
+
+}
+
+- (void)setText:(NSString*)text forPullRefreshIndicatorState:(VUIGridViewPullRefreshIndicatorState)state {
+
+    NSNumber* key = @(state);
+    [_pullRefreshIndicatorTexts setObject:text forKey:key];
+    
+}
+
+- (void)setText:(NSString*)text forMoreIndicatorState:(VUIGridViewMoreIndicatorState)state {
+
+    NSNumber* key = @(state);
+    [_moreIndicatorTexts setObject:text forKey:key];
+
 }
 
 - (void)reloadData {
@@ -230,7 +483,9 @@
         _numberOfCell = [_dataSource numberOfCellOfGridView:self];
 	    [self _resetContentSize];
 		// clear all cells and check visibility again
-        [self _removeAllVisibleCells];
+        for( VUIGridCellView* cell in _visibleCells ) {
+            [cell _setIndex:NSNotFound];
+        }
         [self _setNeedCheckVisibility];
     } else {
         // clear all unnecessary
@@ -466,6 +721,10 @@
 	NSUInteger start = visibleRange.location;
     NSUInteger end = start + visibleRange.length;
     
+  	// refresh content size now
+    _numberOfCell = [_dataSource numberOfCellOfGridView:self];
+    [self _resetContentSize];
+    
     if( index >= end ) {
     	// do nothing, since it is not visible at all
     	return;
@@ -479,17 +738,8 @@
             if( i >= index ) {
                 [c _setIndex:NSNotFound];
             }
-//        	if( i == index ) {
-//	        	[c _setIndex:NSNotFound];
-//            } else if( i > index ) {
-//            	[c _setIndex:i-1];
-//            }
         }
     }
-    
-	// refresh content size now
-    _numberOfCell = [_dataSource numberOfCellOfGridView:self];
-    [self _resetContentSize];
   
     if( !_updating && !_scrollView.dragging && !_scrollView.decelerating ) {
         [self _setNeedCheckVisibility];
@@ -515,6 +765,97 @@
             [self _setNeedCheckVisibility];
         }
     }
+}
+
+- (void)insertCellsAtIndexes:(NSIndexSet*)indexes animated:(BOOL)animated {
+
+	VUILog(@"VUIGridView insert cell at indexes %@", indexes);
+        
+    _numberOfCell = [_dataSource numberOfCellOfGridView:self];
+    [self _resetContentSize];
+    
+    NSUInteger first = indexes.firstIndex;
+    
+	NSRange visibleRange = [self _calculateVisibleRange];
+	NSUInteger start = visibleRange.location;
+    NSUInteger end = start + visibleRange.length;
+
+    if( first >= end ) {
+    	// do nothing, since it is not visible at all
+    	return;
+    }
+    // change the index of all visible cells after the index
+    for( VUIGridCellView* c in _visibleCells ) {
+        NSUInteger i = c.index;
+        if( NSNotFound != i && i >= first ) {
+            [c _setIndex: NSNotFound];
+        }
+    }
+    
+    if( !_updating && !_scrollView.dragging && !_scrollView.decelerating ) {
+        [self _setNeedCheckVisibility];
+    }
+}
+
+- (void)removeCellsAtIndexex:(NSIndexSet*)indexes animated:(BOOL)animated {
+
+	VUILog(@"VUIGridView remove cells at index %@", indexes);
+    
+ 	// refresh content size now
+    _numberOfCell = [_dataSource numberOfCellOfGridView:self];
+    [self _resetContentSize];
+    
+    NSUInteger first = indexes.firstIndex;
+    
+    // calculate the old visible range first
+    NSRange visibleRange = [self _calculateVisibleRange];
+	NSUInteger start = visibleRange.location;
+    NSUInteger end = start + visibleRange.length;
+    
+    if( first >= end ) {
+    	// do nothing, since it is not visible at all
+    	return;
+    }
+    
+    // change the index of all visible cells after the index
+    for( VUIGridCellView* c in _visibleCells ) {
+    	NSUInteger i = c.index;
+        if( NSNotFound != i ) {
+            if( i >= first ) {
+                [c _setIndex:NSNotFound];
+            }
+        }
+    }
+  
+    if( !_updating && !_scrollView.dragging && !_scrollView.decelerating ) {
+        [self _setNeedCheckVisibility];
+    }
+
+}
+
+- (void)reloadCellsAtIndexes:(NSIndexSet*)indexes animated:(BOOL)animated {
+
+    VUILog(@"VUIGridView reload cell at index %@", indexes);
+    NSUInteger first = indexes.firstIndex;
+    NSUInteger last = indexes.lastIndex;
+    
+    // replace a cell by replacing the existing one
+    // mark the exisiting cell as deleted;
+    BOOL found = NO;
+    for( VUIGridCellView* c in _visibleCells ) {
+        NSUInteger i = c.index;
+        if( i >= first && i <= last ) {
+            [c _setIndex:NSNotFound];
+            found = YES;
+            break;
+        }
+    }
+    if( !_updating && found ) {
+        if( !_scrollView.dragging && !_scrollView.decelerating ) {
+            [self _setNeedCheckVisibility];
+        }
+    }
+    
 }
 
 #endif
@@ -557,6 +898,77 @@
     if( prevOp ) {
 		[prevOp cancel];
     }
+}
+
+
+- (void)_setRefreshIndicatorState:(VUIGridViewPullRefreshIndicatorState)state {
+    if( state != _pullRefreshIndicatorState ) {
+    
+        _pullRefreshIndicatorState = state;
+        
+        UIScrollView* scrollView = _scrollView;
+        id<VUIGridViewDelegate> delegate = _delegate;
+        
+        id<VUIGVPullRrefrehViewProtocol> refresh = _pullRefreshView;
+        
+        NSString* text = [self textForPullRefreshIndicatorState:_pullRefreshIndicatorState];
+        [refresh setTitle:text];
+        
+        CGFloat topInset = 0;
+        BOOL activeAni = NO;
+        
+        if( VUIGridViewPullRefreshState_Refreshing == state ) {
+            VUIGridView* s = self;
+            
+            UIView* refreshView = (UIView*)refresh;
+            CGRect frame = scrollView.frame;
+            CGSize preferredSize = [refreshView sizeThatFits:frame.size];
+            topInset = preferredSize.height;
+
+            dispatch_async(dispatch_get_main_queue(), ^() {
+                [delegate gridViewDidRequestRefresh:s];
+            });
+            activeAni = YES;
+        }
+        
+        if( topInset != scrollView.contentInset.top ) {
+            UIEdgeInsets inset = scrollView.contentInset;
+            inset.top = topInset;
+            [scrollView setContentInset:inset];
+            if( VUIGridViewPullRefreshState_Idle == state || VUIGridViewPullRefreshState_Refreshing == state ) {
+                [scrollView setContentOffset:CGPointMake(0, -inset.top) animated:YES];
+            }  
+        }
+        if( activeAni != [refresh activeAnimation] ) {
+            [refresh setActiveAnimation:activeAni];
+        }
+    
+    }
+    
+}
+
+- (void)_setMoreIndicatorState:(VUIGridViewMoreIndicatorState)state {
+
+    if( state != _moreIndicatorState ) {
+    
+        _moreIndicatorState = state;
+        
+        NSString* text = [self textForMoreIndicatorState:_moreIndicatorState];
+        _moreView.title = text;
+
+        BOOL activeAni = NO;
+        
+        if( VUIGridViewMoreState_Refreshing == state ) {
+            activeAni = YES;
+            
+            dispatch_async(dispatch_get_main_queue(), ^() {
+                [_delegate gridViewDidRequestMore:self];
+            });
+        }
+        
+        _moreView.activeAnimation = activeAni;
+    }
+
 }
 
 @end

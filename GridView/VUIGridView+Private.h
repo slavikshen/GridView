@@ -13,5 +13,8 @@
 - (void)_requestUpdateCellContent:(VUIGridCellView*)cell;
 - (void)_cancelUpdateCellContent:(VUIGridCellView*)cell;
 
+- (void)_setRefreshIndicatorState:(VUIGridViewPullRefreshIndicatorState)state;
+- (void)_setMoreIndicatorState:(VUIGridViewMoreIndicatorState)state;
+
 @end
 
