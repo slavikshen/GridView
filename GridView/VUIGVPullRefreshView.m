@@ -162,6 +162,8 @@
 
 - (void)layoutSublayersOfLayer:(CALayer *)layer {
 
+    [super layoutSublayersOfLayer:layer];
+
     if( layer == self.layer ) {
         [self _refreshPath];
     }

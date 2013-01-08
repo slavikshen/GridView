@@ -130,7 +130,7 @@
     NSInteger cWPW = cW+cPW;
     NSInteger cHPH = cH+cPH;
     NSInteger leftIndent = floorf((W-((col-1)*cWPW+cW))/2);
-    NSInteger topIndent = cPH;
+    NSInteger topIndent = 0;
     
     NSSet* visibleCells = [[NSSet alloc] initWithSet:_visibleCells copyItems:NO];
 	for( VUIGridCellView* c in visibleCells ) {
@@ -275,7 +275,7 @@
     NSInteger asideSpacing = (W-((col-1)*cWPW+cW));
     
     NSInteger leftIndent = W*pageIndex+asideSpacing/2;
-    NSInteger topIndent = cPH;
+    NSInteger topIndent = 0;
     // don't layout the deleted cells
     NSUInteger cellCol = index / row;
     NSUInteger cellRow = index % row;
@@ -323,7 +323,8 @@
     NSUInteger numberOfCells = _numberOfCell;
     NSUInteger numberOfRows = numberOfCells/col + ( numberOfCells%col ? 1 : 0 );
     
-    CGFloat h = numberOfRows*(cH+cPH)+cPH;
+//    CGFloat h = numberOfRows*(cH+cPH)+cPH;
+    CGFloat h = numberOfRows*(cH+cPH);
     
     CGSize contentSize = CGSizeMake(W, h);
     

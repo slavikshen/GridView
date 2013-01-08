@@ -64,12 +64,10 @@
         CGRect newShadowFrame =
         CGRectMake(0, 0, self.bounds.size.width, GRIDVIEW_SHADOW_HEIGHT);
         newShadow.frame = newShadowFrame;
-        CGColorRef darkColor = [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.5f].CGColor;
-        CGColorRef lightColor = [_scrollView.backgroundColor colorWithAlphaComponent:0.0].CGColor;
-        newShadow.colors = [NSArray arrayWithObjects:
-                            (id)(darkColor),
-                            (id)(lightColor),
-                            nil];
+        newShadow.colors = @[
+            (id)[UIColor colorWithWhite:0 alpha:0.3f].CGColor,
+            (id)[UIColor colorWithWhite:0 alpha:0].CGColor,
+        ];
         newShadow.zPosition = 1;
         _topShadowLayer = newShadow;
         
@@ -155,6 +153,7 @@
 	SRELEASE(_visibleCells);
     SRELEASE(_recycledCells);
     
+    ((VUIGridViewScrollView*)_scrollView).gridView = nil;
 	_scrollView.delegate = nil;
     [super dealloc];
 }
@@ -219,25 +218,36 @@
 
 - (void)setDataSource:(id<VUIGridViewDataSource>)dataSource {
 	if( _dataSource != dataSource ) {
+
     	_dataSource = dataSource;
         
-        _dataSourceWillUpgradeContent = [_dataSource respondsToSelector:@selector(gridView:upgradeCellAtIndex:)];
-        
-        if( _dataSourceWillUpgradeContent ) {
-        	if( nil == _updateCellContentQueue ) {
-            	NSOperationQueue* queue = [NSOperationQueue new];
-                self.updateCellContentQueue = queue;
-                [queue release];
+        if( _dataSource ) {
+            _dataSourceWillUpgradeContent = [_dataSource respondsToSelector:@selector(gridView:upgradeCellAtIndex:)];
+            
+            if( _dataSourceWillUpgradeContent ) {
+                if( nil == _updateCellContentQueue ) {
+                    NSOperationQueue* queue = [NSOperationQueue new];
+                    self.updateCellContentQueue = queue;
+                    [queue release];
+                }
+            } else {
+                if( _updateCellContentQueue ) {
+                    [_updateCellContentQueue cancelAllOperations];
+                    self.updateCellContentQueue = nil;
+                }
             }
+
+            [self _doReloadData:NO];
         } else {
-        	if( _updateCellContentQueue ) {
-            	[_updateCellContentQueue cancelAllOperations];
-                self.updateCellContentQueue = nil;
+            if( _visibleCells.count ) {
+                NSSet* visibles = [NSSet setWithSet:_visibleCells];
+                for( VUIGridCellView* c in visibles ) {
+                    [self _cleanUpCellForRecycle:c];
+                }
+                [_visibleCells removeAllObjects];
+                [_recycledCells removeAllObjects];
             }
         }
-        
-        [UIApplication cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadData) object:nil];
-        [self performSelector:@selector(reloadData) withObject:nil afterDelay:0.1f];
     }
 }
 
@@ -358,7 +368,7 @@
         CGFloat topInset = 0;
         BOOL activeAni = NO;
         
-        id<VUIGridViewDelegate> delegate = self.delegate;
+//        id<VUIGridViewDelegate> delegate = self.delegate;
         
         if( VUIGridViewPullRefreshState_Refreshing == state ||
             VUIGridViewPullRefreshState_Recognized == state
@@ -372,10 +382,10 @@
             topInset = preferredSize.height;
         }
         if( VUIGridViewPullRefreshState_Refreshing == state ) {
-            VUIGridView* s = self;
-            dispatch_async(dispatch_get_main_queue(), ^() {
-                [delegate gridViewDidRequestRefresh:s];
-            });
+//            VUIGridView* s = self;
+//            dispatch_async(dispatch_get_main_queue(), ^() {
+//                [delegate gridViewDidRequestRefresh:s];
+//            });
             activeAni = YES;
         }
 
@@ -477,6 +487,11 @@
 }
 
 - (void)reloadData {
+	[self _doReloadData:NO];
+}
+
+- (void)_doReloadData:(BOOL)sync {
+
 	[UIApplication cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadData) object:nil];
     
     if( _dataSource ) {
@@ -486,7 +501,11 @@
         for( VUIGridCellView* cell in _visibleCells ) {
             [cell _setIndex:NSNotFound];
         }
-        [self _setNeedCheckVisibility];
+        if( sync ) {
+            [self _doCheckVisibility];
+        } else {
+            [self _setNeedCheckVisibility];
+        }
     } else {
         // clear all unnecessary
 		[self _removeAllVisibleCells];
@@ -496,6 +515,7 @@
         _numberOfCell = 0;
         _scrollView.contentSize = _scrollView.bounds.size;
     }
+
 }
 
 
@@ -847,7 +867,6 @@
         if( i >= first && i <= last ) {
             [c _setIndex:NSNotFound];
             found = YES;
-            break;
         }
     }
     if( !_updating && found ) {
