@@ -6,6 +6,7 @@
 //  Copyright (c) 2011 apollobrowser.com. All rights reserved.
 //
 
+#import "VUIGridView.h"
 #import "VUIGridCellView.h"
 #import "VUIGridCellView+Private.h"
 #import "VUIGridCellHightlightView.h"
@@ -92,7 +93,7 @@
             if( _hightlightStyle ) {
                 if( nil == _hightlightView ) {
                     VUIGridCellHightlightView* highlightView = [[VUIGridCellHightlightView alloc] initWithFrame:self.bounds];
-                    highlightView.autoresizingMask = UIViewAutoresizingFlexibleSize;
+                    highlightView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
                     highlightView.style = _hightlightStyle;
                     [self insertSubview:highlightView atIndex:0];
                     self.hightlightView = highlightView;

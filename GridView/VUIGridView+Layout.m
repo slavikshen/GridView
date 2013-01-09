@@ -659,7 +659,7 @@
     } else {
         if( nil == emptyView.superview ) {
             // show emptyView
-            emptyView.autoresizingMask = UIViewAutoresizingFlexibleSize;
+            emptyView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
             emptyView.frame = self.bounds;
             [self addSubview:emptyView];
         }

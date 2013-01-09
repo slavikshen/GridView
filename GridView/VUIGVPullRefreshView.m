@@ -8,6 +8,7 @@
 
 #import "VUIGVPullRefreshView.h"
 #import <QuartzCore/QuartzCore.h>
+#import "VUIGridView.h"
 
 #define INDENT_R 2
 #define DROP_R 3

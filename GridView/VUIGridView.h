@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Quartz/Quartz.h>
 #import "VUIGridCellView.h"
 #import "VUIGVPullRrefrehViewProtocol.h"
 #import "VUIGVMoreView.h"
@@ -24,6 +25,12 @@
 #define VUIGRIDVIEW_DEFAULT_CELL_SPACING CGSizeMake(1, 20)
 
 #define GRIDVIEW_SHADOW_HEIGHT 5
+
+#define _L(x) (NSLocalizedString(x,@""))
+#define _F(fmt,...) ([NSString stringWithFormat:fmt, ##__VA_ARGS__] )
+
+#define IS_SIZE_CHANGED(p,n) (ABS(p.width-n.width)>1||ABS(p.height-n.height)>1)
+#define SRELEASE(x) { [x release]; x = nil; }
 
 //#define PULL_REFRESH_VIEW_HEIGHT_IPHONE 44
 //#define PULL_REFRESH_VIEW_HEIGHT_IPAD   64
@@ -69,11 +76,10 @@ typedef enum {
 - (CGSize)cellSizeOfGridView:(VUIGridView*)gridView;
 - (CGSize)cellSpacingOfGridView:(VUIGridView*)gridView;
 
-@optional
-
 // sync create and set cell
 - (VUIGridCellView*)gridView:(VUIGridView*)gridView cellAtIndex:(NSUInteger)index;
 
+@optional
 // async create and set cell
 - (void)gridView:(VUIGridView*)gridView upgradeCellAtIndex:(NSUInteger)index;
 
