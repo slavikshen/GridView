@@ -7,7 +7,7 @@
 //
 
 #import "VUIGVMoreView.h"
-#import <Quartz/Quartz.h>
+#import <QuartzCore/QuartzCore.h>
 #import "VUIGridView.h"
 
 @interface VUIGVMoreView()

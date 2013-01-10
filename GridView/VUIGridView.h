@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <Quartz/Quartz.h>
+#import <QuartzCore/QuartzCore.h>
 #import "VUIGridCellView.h"
 #import "VUIGVPullRrefrehViewProtocol.h"
 #import "VUIGVMoreView.h"
