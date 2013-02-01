@@ -115,7 +115,7 @@
     [self _prepareTopShadowLayer];
 
 }
-
+#if TARGET_OS_IPHONE
 - (id)initWithCoder:(NSCoder *)aDecoder {
 	self = [super initWithCoder:aDecoder];
     if( self ) {
@@ -123,6 +123,7 @@
     }
     return self;
 }
+#endif
 
 - (id)initWithFrame:(CGRect)frame {
 	self = [super initWithFrame:frame];
