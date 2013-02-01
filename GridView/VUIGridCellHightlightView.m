@@ -19,6 +19,7 @@
     return self;
 }
 
+#if TARGET_OS_IPHONE
 - (id)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     if( self ) {
@@ -26,6 +27,7 @@
     }
     return self;
 }
+#endif
 
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.
