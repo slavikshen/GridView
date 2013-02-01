@@ -20,12 +20,13 @@
     _prevOffset = CGPointMake(-1,-1);
 
 }
-
+#if TARGET_OS_IPHONE
 - (id)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     [self _setup];
     return self;
 }
+#endif
 
 - (id)initWithFrame:(CGRect)frame {
 
