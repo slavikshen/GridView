@@ -955,9 +955,11 @@
             UIEdgeInsets inset = scrollView.contentInset;
             inset.top = topInset;
             [scrollView setContentInset:inset];
+#if TARGET_OS_IPHONE
             if( VUIGridViewPullRefreshState_Idle == state || VUIGridViewPullRefreshState_Refreshing == state ) {
                 [scrollView setContentOffset:CGPointMake(0, -inset.top) animated:YES];
-            }  
+            }
+#endif
         }
         if( activeAni != [refresh activeAnimation] ) {
             [refresh setActiveAnimation:activeAni];
