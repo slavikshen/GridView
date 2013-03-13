@@ -57,7 +57,9 @@
 }
 
 - (void)_prepareTopShadowLayer {
-    
+    if (!self.showTopShadow) {
+        return;
+    }
     if( nil == _topShadowLayer ) {
         // create shadow
         CAGradientLayer *newShadow = [[CAGradientLayer alloc] init];
