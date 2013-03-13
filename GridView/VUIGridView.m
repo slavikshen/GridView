@@ -79,7 +79,7 @@
 
 - (void)setup {
     
-    _topShadowLayer = YES;
+    _showTopShadow = YES;
     
     _numberOfColumn = 1;
     _numberOfRow = 1;
