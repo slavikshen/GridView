@@ -56,6 +56,19 @@
     _topShadowLayer.opacity = 0;
 }
 
+- (void) setShowTopShadow:(BOOL)showTopShadow {
+    _showTopShadow = showTopShadow;
+    
+    if (_showTopShadow) {
+        [self _prepareTopShadowLayer];
+    } else {
+        if (_topShadowLayer) {
+            [_topShadowLayer removeFromSuperlayer];
+            _topShadowLayer = nil;
+        }
+    }
+}
+
 - (void)_prepareTopShadowLayer {
     if (!self.showTopShadow) {
         return;
