@@ -174,6 +174,8 @@ typedef enum {
 @property(nonatomic,retain) UIView* backgroundView;
 @property(nonatomic,retain) UIView* emptyView;
 
+@property(nonatomic,assign) UIEdgeInsets contentInsets;
+
 - (void)setup;
 
 - (void)reloadData;

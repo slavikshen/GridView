@@ -115,10 +115,12 @@
 
 - (void)_layoutCellsInVerticalModeFromIndex:(NSUInteger)index {
 
+    UIEdgeInsets insets = self.contentInsets;
+
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
     
-    CGFloat W = bounds.size.width;
+    CGFloat W = bounds.size.width -(insets.left+insets.right);
     
     CGFloat cW = _cellSize.width;
     CGFloat cH = _cellSize.height;
@@ -129,8 +131,8 @@
     
     NSInteger cWPW = cW+cPW;
     NSInteger cHPH = cH+cPH;
-    NSInteger leftIndent = floorf((W-((col-1)*cWPW+cW))/2);
-    NSInteger topIndent = 0;
+    NSInteger leftIndent = floorf((W-((col-1)*cWPW+cW))/2) +insets.left;
+    NSInteger topIndent = insets.top;
     
     NSSet* visibleCells = [[NSSet alloc] initWithSet:_visibleCells copyItems:NO];
 	for( VUIGridCellView* c in visibleCells ) {
@@ -165,6 +167,8 @@
 
 - (void)_layoutCellsInHorizontalModeFromIndex:(NSUInteger)index {
 
+    UIEdgeInsets insets = self.contentInsets;
+
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
     
@@ -183,7 +187,7 @@
     NSInteger cHPH = cH+cPH;
         
     NSInteger asideSpacing = (W-((col-1)*cWPW+cW));
-    NSInteger topIndent = cPH;
+    NSInteger topIndent = cPH+insets.top;
     
     NSSet* visibleCells = [[NSSet alloc] initWithSet:_visibleCells copyItems:NO];
 	for( VUIGridCellView* c in visibleCells ) {
@@ -195,7 +199,7 @@
             
             NSUInteger pageIndex = i/numberOfCellInPage;
             
-            NSInteger leftIndent = W*pageIndex+asideSpacing/2;
+            NSInteger leftIndent = W*pageIndex+asideSpacing/2 +insets.left;
             
             NSInteger x = leftIndent+(cellCol-pageIndex*_numberOfColumnInPage)*cWPW;
             NSInteger y = topIndent+cellRow*cHPH;
@@ -222,10 +226,12 @@
 
 - (CGRect)_frameForCellInVerticalModeAtIndex:(NSUInteger)index {
 
+    UIEdgeInsets insets = self.contentInsets;
+    
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
     
-    CGFloat W = bounds.size.width;
+    CGFloat W = bounds.size.width -(insets.left+insets.right);
     
     CGFloat cW = _cellSize.width;
     CGFloat cH = _cellSize.height;
@@ -244,6 +250,10 @@
     
     NSInteger x = leftIndent+cellCol*cWPW;
     NSInteger y = topIndent+cellRow*cHPH;
+    
+
+    x += insets.left;
+    y += insets.top;
     
     CGRect frame = CGRectMake(x, y, cW, cH);
 
@@ -283,6 +293,10 @@
     NSInteger x = leftIndent+(cellCol-pageIndex*_numberOfColumnInPage)*cWPW;
     NSInteger y = topIndent+cellRow*cHPH;
     
+    UIEdgeInsets insets = self.contentInsets;
+    x += insets.left;
+    y += insets.top;
+    
     CGRect frame = CGRectMake(x, y, cW, cH);
     
 	return frame;
@@ -302,7 +316,9 @@
 	UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
     
-    CGFloat W = bounds.size.width;
+    UIEdgeInsets insets = self.contentInsets;
+    
+    CGFloat W = bounds.size.width - (insets.left + insets.right);
     CGFloat H = bounds.size.height;
     
     CGFloat cW = _cellSize.width;
@@ -324,7 +340,7 @@
     NSUInteger numberOfRows = numberOfCells/col + ( numberOfCells%col ? 1 : 0 );
     
 //    CGFloat h = numberOfRows*(cH+cPH)+cPH;
-    CGFloat h = numberOfRows*(cH+cPH);
+    CGFloat h = numberOfRows*(cH+cPH)+(insets.top+insets.bottom);
     
     CGSize contentSize = CGSizeMake(W, h);
     
@@ -344,8 +360,10 @@
     UIScrollView* scrollView = self.scrollView;
 	CGRect bounds = scrollView.bounds;
     
+    UIEdgeInsets insets = self.contentInsets;
+    
     CGFloat W = bounds.size.width;
-    CGFloat H = bounds.size.height;
+    CGFloat H = bounds.size.height - (insets.top + insets.bottom);
     
     CGFloat cW = _cellSize.width;
     CGFloat cH = _cellSize.height;
@@ -366,7 +384,7 @@
     NSUInteger numberOfCellInPage = col*row;
     NSUInteger numberOfPage = numberOfCells/numberOfCellInPage + ( numberOfCells%numberOfCellInPage ? 1 : 0 );
     
-    CGFloat contentWidth = numberOfPage*W;
+    CGFloat contentWidth = numberOfPage*W+(insets.left+insets.right);
     
     CGSize contentSize = CGSizeMake(contentWidth, H);
     
