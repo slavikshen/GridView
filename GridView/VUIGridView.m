@@ -911,6 +911,23 @@
     return cell;
 }
 
+- (void)setSelectedIndex:(NSUInteger)selectedIndex {
+    
+    if( _selectedIndex == selectedIndex ) {
+        return;
+    }
+    
+    if( NSNotFound != _selectedIndex ) {
+        VUIGridCellView* cell = [self cellAtIndex:_selectedIndex];
+        [cell setSelected:NO];
+    }
+    _selectedIndex = selectedIndex;
+    if( NSNotFound != _selectedIndex ) {
+        VUIGridCellView* cell = [self cellAtIndex:_selectedIndex];
+        [cell setSelected:YES];
+    }
+    
+}
 
 @end
 
