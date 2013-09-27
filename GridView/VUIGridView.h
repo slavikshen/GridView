@@ -105,7 +105,7 @@ typedef enum {
 - (id<VUIGVPullRrefrehViewProtocol>)moreViewForGridView:(VUIGridView*)gridView;
 
 - (BOOL)isThereMoreDataForGridView:(VUIGridView *)gridView;
-
+- (BOOL)cellSwitchAnimationStopped;
 
 @end
 
