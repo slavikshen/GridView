@@ -30,8 +30,10 @@
 }
 
 - (void)_clickCell:(VUIGridCellView*)cell {
-    if (!self.delegate.cellSwitchAnimationStopped)
-        return;
+    SEL csass = sel_registerName("cellSwitchAnimationStopped");
+    if ([self.delegate respondsToSelector:csass])
+        if (!self.delegate.cellSwitchAnimationStopped)
+            return;
     NSUInteger index = cell.index;
     if( _delegateWillResponseDeselect && NSNotFound != _selectedIndex ) {
         [self.delegate gridView:self didDeselectCellAtIndexPath:_selectedIndex];
