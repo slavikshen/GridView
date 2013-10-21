@@ -106,6 +106,7 @@ typedef enum {
 
 - (BOOL)isThereMoreDataForGridView:(VUIGridView *)gridView;
 - (BOOL)cellSwitchAnimationStopped;
+- (BOOL)isActionCell:(NSInteger)atIndex;
 
 @end
 
