@@ -40,10 +40,12 @@
     if( _delegateWillResponseDeselect && NSNotFound != _selectedIndex ) {
         [self.delegate gridView:self didDeselectCellAtIndexPath:_selectedIndex];
     }
-    if ([self.delegate isActionCell:index]) {
-        [self.delegate gridView:self didSelectCellAtIndexPath:index];
-        return;
-    }
+    SEL iacs = sel_registerName("isActionCell:");
+    if ( [self.delegate respondsToSelector:iacs])
+        if ([self.delegate isActionCell:index]) {
+            [self.delegate gridView:self didSelectCellAtIndexPath:index];
+            return;
+        }
 
     self.selectedIndex = index;
     VUIGridCellView* prevCell = [self cellAtIndex:_selectedIndex];
