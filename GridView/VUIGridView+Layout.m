@@ -19,24 +19,6 @@
 @implementation VUIGridView (Layout)
 
 
-- (void)setSelectedIndex:(NSUInteger)selectedIndex {
-
-    if( _selectedIndex == selectedIndex ) {
-        return;
-    }
-
-    if( NSNotFound != _selectedIndex ) {
-        VUIGridCellView* cell = [self cellAtIndex:_selectedIndex];
-        [cell setSelected:NO];
-    }
-    _selectedIndex = selectedIndex;
-    if( NSNotFound != _selectedIndex ) {
-        VUIGridCellView* cell = [self cellAtIndex:_selectedIndex];
-        [cell setSelected:YES];
-    }
-
-}
-
 - (void)_popRecycledCellsIfNecessary {
 
     NSUInteger max = ( self.mode ? _numberOfRowInPage : _numberOfColumnInPage );
@@ -48,9 +30,23 @@
 }
 
 - (void)_clickCell:(VUIGridCellView*)cell {
+    if (cell.index == self.selectedIndex || cell.index == _selectedIndex)
+        return;
+    SEL csass = sel_registerName("cellSwitchAnimationStopped");
+    if ([self.delegate respondsToSelector:csass])
+        if (!self.delegate.cellSwitchAnimationStopped)
+            return;
     NSUInteger index = cell.index;
     if( _delegateWillResponseDeselect && NSNotFound != _selectedIndex ) {
         [self.delegate gridView:self didDeselectCellAtIndexPath:_selectedIndex];
+    }
+    if (!IS_PHONE) {
+        SEL iacs = sel_registerName("isActionCell:");
+        if ( [self.delegate respondsToSelector:iacs])
+            if ([self.delegate isActionCell:index]) {
+                [self.delegate gridView:self didSelectCellAtIndexPath:index];
+                return;
+            }
     }
 
     self.selectedIndex = index;

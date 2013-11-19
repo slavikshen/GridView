@@ -32,16 +32,6 @@
 #define IS_SIZE_CHANGED(p,n) (ABS(p.width-n.width)>1||ABS(p.height-n.height)>1)
 #define SRELEASE(x) { [x release]; x = nil; }
 
-//#define PULL_REFRESH_VIEW_HEIGHT_IPHONE 44
-//#define PULL_REFRESH_VIEW_HEIGHT_IPAD   64
-//#define PULL_REFRESH_VIEW_HEIGHT ( IS_PHONE ? PULL_REFRESH_VIEW_HEIGHT_IPHONE : PULL_REFRESH_VIEW_HEIGHT_IPAD )
-//#define PULL_REFRESH_VIEW_WIDTH 320
-//
-//#define MORE_VIEW_HEIGHT_IPHONE 44
-//#define MORE_VIEW_HEIGHT_IPAD   64
-//#define MORE_VIEW_HEIGHT ( IS_PHONE ? MORE_VIEW_HEIGHT_IPHONE : MORE_VIEW_HEIGHT_IPAD )
-//#define MORE_VIEW_WIDTH 320
-
 #if TARGET_OS_IPHONE
 #define MAX_PULL_REFRESH_TAIL_LENGTH_FOR_RECOGNIZING 36
 #else
@@ -105,7 +95,8 @@ typedef enum {
 - (id<VUIGVPullRrefrehViewProtocol>)moreViewForGridView:(VUIGridView*)gridView;
 
 - (BOOL)isThereMoreDataForGridView:(VUIGridView *)gridView;
-
+- (BOOL)cellSwitchAnimationStopped;
+- (BOOL)isActionCell:(NSInteger)atIndex;
 
 @end
 

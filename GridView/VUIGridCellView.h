@@ -24,7 +24,7 @@ typedef enum {
     VUIGridCellHighlightStyle_RoundCorner,
     
     VUIGridCellHighlightStyle_GradientBlue,
-    VUIGridCellHighlightStyle_GradientRed,
+    VUIGridCellHighlightStyle_GradientLightRed,
     VUIGridCellHighlightStyle_GradientGreen,
 
 } VUIGridCellHighlightStyle;

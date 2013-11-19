@@ -45,10 +45,11 @@
                    endColor:[UIColor colorWithHue:0.56f saturation:0.8f brightness:1 alpha:1]];
         break;
         
-        case VUIGridCellHighlightStyle_GradientRed:
+        case VUIGridCellHighlightStyle_GradientLightRed:
         [self _drawGradient:rect
-                 startColor:[UIColor colorWithHue:0 saturation:0.8f brightness:0.7 alpha:1]
-                   endColor:[UIColor colorWithHue:0 saturation:0.8f brightness:1 alpha:1]];
+                 startColor:[UIColor colorWithHue:240.0/360.0 saturation:0.0 brightness:0.93 alpha:1]
+                   endColor:[UIColor colorWithHue:240.0/360.0 saturation:0.0 brightness:0.93 alpha:1]
+                 withBorder:NO];
         break;
 
         case VUIGridCellHighlightStyle_GradientGreen:
@@ -63,6 +64,9 @@
 }
 
 - (void)_drawGradient:(CGRect)rect startColor:(UIColor*)startColor endColor:(UIColor*)endColor {
+    [self _drawGradient:rect startColor:startColor endColor:endColor withBorder:YES];
+}
+- (void)_drawGradient:(CGRect)rect startColor:(UIColor*)startColor endColor:(UIColor*)endColor withBorder:(BOOL)border {
 
     CGContextRef context = UIGraphicsGetCurrentContext();
 	CGContextSaveGState(context);
@@ -94,24 +98,26 @@
 	CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, 0);
 	CGGradientRelease(gradient), gradient = NULL;
     
-    CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:0 alpha:0.4f].CGColor);
-    CGContextMoveToPoint( context, l, t );
-    CGContextAddLineToPoint( context, l, b);
-    CGContextMoveToPoint( context, r, t );
-    CGContextAddLineToPoint( context, r, b );
-    CGContextStrokePath(context);
-    
-    // gray
-    CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:0.5f alpha:1].CGColor);
-    CGContextMoveToPoint(context, l, b);
-    CGContextAddLineToPoint(context, r, b);
-    CGContextStrokePath(context);
-
-    // dark 
-    CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:0 alpha:1].CGColor);
-    CGContextMoveToPoint(context, l, t);
-    CGContextAddLineToPoint(context, r, t);
-    CGContextStrokePath(context);
+    if (border) {
+        CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:0 alpha:0.4f].CGColor);
+        CGContextMoveToPoint( context, l, t );
+        CGContextAddLineToPoint( context, l, b);
+        CGContextMoveToPoint( context, r, t );
+        CGContextAddLineToPoint( context, r, b );
+        CGContextStrokePath(context);
+        
+        // gray
+        CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:0.5f alpha:1].CGColor);
+        CGContextMoveToPoint(context, l, b);
+        CGContextAddLineToPoint(context, r, b);
+        CGContextStrokePath(context);
+        
+        // dark
+        CGContextSetStrokeColorWithColor(context, [UIColor colorWithWhite:0 alpha:1].CGColor);
+        CGContextMoveToPoint(context, l, t);
+        CGContextAddLineToPoint(context, r, t);
+        CGContextStrokePath(context);        
+    }
     
 	CGContextRestoreGState(context);
 
